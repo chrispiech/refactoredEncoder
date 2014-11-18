@@ -17,16 +17,21 @@ import util.FileSystem;
 import util.MatrixUtil;
 
 public class BlockyPrePostTest {
-
+	/*bonobo-epoch1
+	bumbleBee
+	gorilla-epoch1
+	macaque-epoch11
+	pygmy-epoch1*/
+	
 	private void run() {
 		EncoderParams.setLanguage("blocky");
 		FileSystem.setAssnId("Hoc18");
 
 		FileSystem.setExpId("postExp"); 
-		List<TestTriplet>testSet = PostExperimentLoader.loadTests("train", 5000, new BlockyLanguage());
+		List<TestTriplet>testSet = PostExperimentLoader.loadTests("train", -1, new BlockyLanguage());
 
 		FileSystem.setExpId("prePostExp");
-		Encoder model = EncoderSaver.load("bonobo");
+		Encoder model = EncoderSaver.load("gorilla-epoch10");
 		testModel(model, testSet, testSet.size());
 		/*for(int i = 0; i < 5; i++) {
 			Encoder model = EncoderSaver.load("macaque0-epoch" + i);

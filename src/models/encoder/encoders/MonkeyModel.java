@@ -76,6 +76,14 @@ public class MonkeyModel implements Encoder, StateEncodable {
 		return stateDecoder.getState(postVector);
 	}
 	
+	@Override
+	public CodeVector getCodeVector(TestTriplet test) {
+		EncodeGraph graph = test.getEncodeGraph();
+		TreeNeuron et = graph.getRunEncodeTreeClone();		
+		SimpleMatrix cv = programEncoder.activateTree(et).getVector();
+		return new CodeVector(cv);
+	}
+	
 	private SimpleMatrix getPostVector(State pre, TreeNeuron et) {
 		TreeNeuron clone = new TreeNeuron(et);
 		SimpleMatrix preVector = stateEncoder.getVector(pre);

@@ -116,7 +116,8 @@ public class AdaGrad {
 			System.out.println("Epoch time: " + (epochEndTime - epochStartTime)/1000.0  +"s");
 			loss[j] = value;  
 			if(!checkGrad) {
-				EncoderSaver.save(x, format, name + "-epoch" + j, "");
+				String notes = EncoderSaver.makeNotes(train, epochs);
+				EncoderSaver.save(x, format, name + "-epoch" + j, notes);
 			}
 		}
 		final long algoEndTime = System.currentTimeMillis();

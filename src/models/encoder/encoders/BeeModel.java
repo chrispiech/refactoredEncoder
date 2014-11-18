@@ -7,6 +7,7 @@ import org.ejml.simple.SimpleMatrix;
 import util.Warnings;
 import models.code.State;
 import models.code.TestTriplet;
+import models.encoder.CodeVector;
 import models.encoder.ModelFormat;
 import models.encoder.decoders.ValueDecoder;
 import models.encoder.encoders.types.StateEncodable;
@@ -88,6 +89,11 @@ public class BeeModel implements Encoder, StateEncodable{
 	public void scale(double d) {
 		stateDecoder.scale(d);
 		stateEncoder.scale(d);
+	}
+
+	@Override
+	public CodeVector getCodeVector(TestTriplet test) {
+		throw new RuntimeException("not a good ask");
 	}
 
 }

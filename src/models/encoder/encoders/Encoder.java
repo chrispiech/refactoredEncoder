@@ -25,4 +25,6 @@ public interface Encoder {
 
 	public ModelFormat getFormat();
 
+	public CodeVector getCodeVector(TestTriplet test);
+
 }

@@ -8,6 +8,7 @@ import models.encoder.dimension.BearDimension;
 import models.encoder.dimension.BeeDimension;
 import models.encoder.dimension.Dimension;
 import models.encoder.dimension.MonkeyDimension;
+import models.encoder.dimension.PenguinDimension;
 import models.language.BlockyLanguage;
 import models.language.KarelLanguage;
 import models.language.Language;
@@ -22,7 +23,7 @@ public class ModelFormat {
 	public ModelFormat(String language, String modelType) {
 		this.modelType = modelType;
 		this.languageType = language;
-		
+
 		if(language.equals("blocky")) {
 			languageFormat = new BlockyLanguage();
 		} else if(language.equals("karel")) {
@@ -30,7 +31,7 @@ public class ModelFormat {
 		} else {
 			throw new RuntimeException("wot");
 		}
-		
+
 		if(modelType.equals("monkey")) {
 			dimension = new MonkeyDimension(languageFormat); 
 		} else if(modelType.equals("bear")) {
@@ -39,13 +40,20 @@ public class ModelFormat {
 			dimension = new BeeDimension(languageFormat);
 		} else if(modelType.equals("chimp")) {
 			dimension = new MonkeyDimension(languageFormat);
+		} else if(modelType.equals("penguin")) {
+			dimension = new PenguinDimension(languageFormat);
 		} else {
+
 			throw new RuntimeException("wot");
 		}
 	}
 
-	public int getDimension() {
+	public int getNumParams() {
 		return dimension.getDimension();
+	}
+	
+	public Dimension getDimension() {
+		return dimension;
 	}
 
 	public int getStateEncoderDimension() {
@@ -63,7 +71,7 @@ public class ModelFormat {
 	public int getStateVectorSize() {
 		return dimension.getStateVectorSize();
 	}
-	
+
 	public int getProgramEncoderDimension() {
 		return getInternalDimension() + getLeafDimension();
 	}
@@ -109,17 +117,21 @@ public class ModelFormat {
 	public boolean isBear() {
 		return modelType.equals("bear");
 	}
-	
+
 	public boolean isMonkey() {
 		return modelType.equals("monkey");
 	}
-	
+
 	public boolean isChimp() {
 		return modelType.equals("chimp");
 	}
-	
+
 	public boolean isBee() {
 		return modelType.equals("bee");
+	}
+	
+	public boolean isPenguin() {
+		return modelType.equals("penguin");
 	}
 
 	public String getModelType() {
@@ -129,7 +141,7 @@ public class ModelFormat {
 	public String getLanguageName() {
 		return languageType;
 	}
-	
+
 	public Language getLanguage() {
 		return languageFormat;
 	}
@@ -156,7 +168,7 @@ public class ModelFormat {
 	public int getTypeVectorSize(String key) {
 		return dimension.getTypeVectorSize(key);
 	}
-	
+
 	public String[] getChoiceOptions(String key) {
 		return languageFormat.getChoiceOptions(key);
 	}

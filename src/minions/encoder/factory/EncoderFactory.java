@@ -27,7 +27,7 @@ public class EncoderFactory {
 	}
 
 	private static double[] makeRandomVec(ModelFormat format) {
-		int dim = format.getDimension();
+		int dim = format.getNumParams();
 		double[] vec = new double[dim];
 		for(int i = 0; i < dim; i++) {
 			vec[i] = RandomUtil.gauss(0, EncoderParams.getInitStd());
@@ -36,7 +36,7 @@ public class EncoderFactory {
 	}
 	
 	public static Encoder makeZero(ModelFormat format) {
-		int dim = format.getDimension();
+		int dim = format.getNumParams();
 		double[] vec = new double[dim];
 		for(int i = 0; i < dim; i++) {
 			vec[i] = 0;

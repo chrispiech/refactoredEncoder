@@ -25,9 +25,9 @@ public class BlockyStateEncoderTest {
 		FileSystem.setAssnId("Hoc18");
 
 		FileSystem.setExpId("prePostExp");
-		List<TestTriplet>testSet = PrePostExperimentLoader.loadTests("test", -1, new BlockyLanguage());
+		List<TestTriplet>testSet = PrePostExperimentLoader.loadTests("test", 5000, new BlockyLanguage());
 		
-		StateEncodable model = (StateEncodable) EncoderSaver.load("bumbleBee");
+		StateEncodable model = (StateEncodable) EncoderSaver.load("gorilla-epoch7");
 		testModel(model, testSet, testSet.size());
 		
 		/*for(int i = 0; i < 100; i++) {

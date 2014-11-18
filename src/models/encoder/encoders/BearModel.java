@@ -37,12 +37,18 @@ public class BearModel implements Encoder{
 		this.programEncoder = program;
 		this.outputDecoder = output;
 	}
-
-	public State getOutput(TestTriplet test) {
+	
+	@Override
+	public CodeVector getCodeVector(TestTriplet test) {
 		EncodeGraph g = test.getEncodeGraph();
 		TreeNeuron runTree = g.getRunEncodeTreeClone();
-		CodeVector activation = programEncoder.activateTree(runTree);
-		return outputDecoder.getState(activation.getVector());
+		CodeVector cv = programEncoder.activateTree(runTree);
+		return cv;
+	}
+
+	public State getOutput(TestTriplet test) {
+		CodeVector cv = getCodeVector(test);
+		return outputDecoder.getState(cv.getVector());
 	}
 
 	@Override
@@ -107,6 +113,8 @@ public class BearModel implements Encoder{
 	public StateDecoder getStateDecoder() {
 		return outputDecoder;
 	}
+
+	
 
 
 

@@ -2,12 +2,14 @@ package minions.encoder;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream.GetField;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import minions.encoder.modelVector.ModelVector;
 import models.code.TestTriplet;
@@ -78,7 +80,7 @@ public class EncoderSaver {
 
 	private static void saveFormat(ModelFormat format, File modelDir) {
 		String formatStr = "";
-		formatStr += "langugage:" +format.getLanguageName() + "\n";
+		formatStr += "language:" +format.getLanguageName() + "\n";
 		formatStr += "modelType:" + format.getModelType() + "\n";
 		formatStr += "codeVectorSize:" + EncoderParams.getCodeVectorSize() +"\n";
 		formatStr += "stateVectorSize:" + EncoderParams.getStateVectorSize();
@@ -88,13 +90,28 @@ public class EncoderSaver {
 	private static ModelFormat loadFormat(File modelDir) {
 		File modelFormatFile = new File(modelDir, "format.txt");
 		List<String> lines = FileSystem.getFileLines(modelFormatFile);
-		String language = lines.get(0).split(":")[1];
-		String modelType = lines.get(1).split(":")[1];
-		int codeVectorSize = Integer.parseInt(lines.get(2).split(":")[1]);
-		int stateVectorSize = Integer.parseInt(lines.get(3).split(":")[1]);
-		EncoderParams.setCodeVectorSize(codeVectorSize);
-		EncoderParams.setStateVectorSize(stateVectorSize);
+		Map<String, String> formatMap = getFormatMap(lines);
+		String language = formatMap.get("language");
+		String modelType = formatMap.get("modelType");
+		if(formatMap.containsKey("codeVectorSize")) {
+			String v = formatMap.get("codeVectorSize");
+			EncoderParams.setCodeVectorSize(Integer.parseInt(v));
+		}
+		if(formatMap.containsKey("stateVectorSize")) {
+			String v = formatMap.get("stateVectorSize");
+			EncoderParams.setStateVectorSize(Integer.parseInt(v));
+		}
 		return new ModelFormat(language, modelType);
+	}
+	
+	private static Map<String, String> getFormatMap(List<String> lines) {
+		Map<String, String> formatMap = new HashMap<String, String>();
+		for(String line : lines) {
+			String key = line.split(":")[0];
+			String value = line.split(":")[1];
+			formatMap.put(key, value);
+		}
+		return formatMap;
 	}
 
 	private static SimpleMatrix loadSimpleMatrix(File dir, String fileName) {

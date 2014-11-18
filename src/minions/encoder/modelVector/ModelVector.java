@@ -9,6 +9,7 @@ import models.encoder.encoders.BearModel;
 import models.encoder.encoders.BeeModel;
 import models.encoder.encoders.Encoder;
 import models.encoder.encoders.MonkeyModel;
+import models.encoder.encoders.PenguinModel;
 import util.Warnings;
 
 
@@ -27,6 +28,8 @@ public class ModelVector {
 			vecList = MonkeyVector.monkeyToVec((MonkeyModel) model);
 		} else if(format.isBee()) {
 			vecList = BeeVector.beeToVec((BeeModel) model);
+		} else if(format.isPenguin()) {
+			vecList = PenguinVector.penguinToVec((PenguinModel) model);
 		}
 
 		validateVec(model, vecList);
@@ -35,9 +38,9 @@ public class ModelVector {
 
 	private static void validateVec(Encoder model, List<Double> vecList) {
 		Warnings.check(vecList != null, "not populated");
-		if(vecList.size() != model.getFormat().getDimension()) {
+		if(vecList.size() != model.getFormat().getNumParams()) {
 			System.out.println("vectorDim: " + vecList.size());
-			System.out.println("expected:  " + model.getFormat().getDimension());
+			System.out.println("expected:  " + model.getFormat().getNumParams());
 			throw new RuntimeException("wrong size!");
 		}
 	}
@@ -53,6 +56,9 @@ public class ModelVector {
 		if(format.isMonkey()) {
 			return MonkeyVector.getNameForIndex(format, elem);
 		}
+		if(format.isPenguin()) {
+			return PenguinVector.getNameForIndex(format, elem);
+		}
 		throw new RuntimeException("todo");
 	}
 
@@ -64,6 +70,8 @@ public class ModelVector {
 			return MonkeyVector.vecToMonkey(format, list);
 		} else if(format.isBee()) {
 			return BeeVector.vecToBee(format, list);
+		} else if(format.isPenguin()) { 
+			return PenguinVector.vecToPenguin(format, list);
 		} else {
 			throw new RuntimeException("no");
 		}

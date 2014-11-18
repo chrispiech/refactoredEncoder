@@ -16,7 +16,7 @@ public class BearVector {
 
 	public static Encoder vecToBear(ModelFormat format, List<Double> list) {
 		int numOutParams = format.getStateDecoderDimension();
-		int dimension = format.getDimension();
+		int dimension = format.getNumParams();
 		Warnings.check(dimension == list.size());
 		
 		List<Double> outList = list.subList(0, numOutParams);

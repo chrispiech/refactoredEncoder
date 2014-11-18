@@ -52,6 +52,10 @@ public class CodeVector implements Clusterable{
 	public void scale(double d) {
 		vector = vector.scale(d);
 	}
+	
+	public double getDist(CodeVector other) {
+		return MatrixUtil.euclidDist(vector, other.vector);
+	}
 
 	@Override
 	public double[] getPoint() {

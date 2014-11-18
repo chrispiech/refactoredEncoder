@@ -19,7 +19,7 @@ public class MonkeyVector {
 		int numInputParams = format.getStateEncoderDimension();
 		int inputOutputParams = numOutParams + numInputParams;
 		
-		int dimension = format.getDimension();
+		int dimension = format.getNumParams();
 		Warnings.check(dimension == list.size());
 		
 		List<Double> outList = list.subList(0, numOutParams);

@@ -10,4 +10,8 @@ public class RandomUtil {
 		return rg.nextGaussian() * std + mean;
 	}
 	
+	public static void setSeed(int seed) {
+		rg.setSeed(seed);
+	}
+	
 }
