@@ -71,8 +71,10 @@ public class AdaGrad {
 			System.out.println("\nEpoch " + j);
 			final long epochStartTime = System.currentTimeMillis();
 
-			long seed = System.nanoTime();
-			Collections.shuffle(train, new Random(seed));			
+			//*Remove for CURRICULUM LEARNING*
+			//long seed = System.nanoTime();
+			//Collections.shuffle(train, new Random(seed));
+			
 			List<List<TestTriplet>> miniBatches = makeMiniBatches(train,
 					miniBatchSize);
 
