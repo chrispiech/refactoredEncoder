@@ -25,13 +25,14 @@ public class BlockyBearCheck {
 
 	private void run() {
 		System.out.println("hello world");
-		EncoderParams.setLanguage("blocky");
 		EncoderParams.setCodeVectorSize(9);
+		EncoderParams.setWeightDecay(0.001);
+		EncoderParams.setInitStd(5);
 		FileSystem.setAssnId("Hoc18");
 		FileSystem.setExpId("postExp");
 
 		format = new ModelFormat(LANGUAGE, MODEL_TYPE);
-		trainSet = PostExperimentLoader.loadTests("train", 200, format.getLanguage());
+		trainSet = PostExperimentLoader.loadTests("train", 50, format.getLanguage());
 		
 		validate(trainSet);
 	}
@@ -39,7 +40,7 @@ public class BlockyBearCheck {
 	public void validate(List<TestTriplet> set) {
 		int epochs = 100;  
 		double eta = EncoderParams.getLearningRate();
-		int miniBatchSize = 1000;
+		int miniBatchSize = 10;
 		double[] loss = new double[epochs];
 		AdaGrad.checkGrad(format, set, epochs, miniBatchSize, eta, loss);
 	}

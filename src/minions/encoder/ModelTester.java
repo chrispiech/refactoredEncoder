@@ -24,6 +24,24 @@ public class ModelTester {
 		return (100.0 * numCorrect) / numTested;
 	}
 	
+	public static double calcAccuracyPartialCredit(Encoder m, List<TestTriplet> ts) {
+		int correct = 0;
+		int tested = 0;
+		for(TestTriplet t : ts) {
+			State guess = m.getOutput(t);
+			State truth = t.getPostcondition();
+			for(String key : guess.getKeys()) {
+				SimpleMatrix a = guess.getActivation(m.getFormat(), key);
+				SimpleMatrix b = truth.getActivation(m.getFormat(), key);
+				if(MatrixUtil.equals(a, b)) {
+					correct++;
+				}
+				tested++;
+			}
+		}
+		return (100.0 * correct) / tested;
+	}
+	
 	public static double stateAutoEncoderAccuracy(StateEncodable model, List<TestTriplet> tests) {
 		int numCorrect = 0;
 		int numTested = 0;
@@ -40,49 +58,5 @@ public class ModelTester {
 		}
 		return (100.0 * numCorrect) / numTested;
 	}
-	
-	/*public static double calcAccuracyPartialCredit(OldEncoderModel m, List<TestTriplet> ts) {
-		int correct = 0;
-		int tested = 0;
-		for(TestTriplet leaf : ts) {
-			int[] guess = predict(m, leaf.getAst());
-			int[] truth = leaf.getPostcondition();
-			for(int i = 0; i < m.getNumOutputs(); i++) {
-				if(guess[i] == truth[i]) {
-					correct += 1;
-				}
-				tested++;
-			}
-		}
-		return (100.0 * correct) / tested;
-	}
-	
-	public static boolean checkCorrect(int[] guess, int[] truth) {
-		for(int i = 0; i < guess.length; i++) {
-			if(guess[i] != truth[i]) {
-				return false;
-			}
-		}
-		return true;
-	}
 
-	public static int[] predict(OldEncoderModel model, Tree ast) {
-		EncodeTree encodeTree = EncodeTreeParser.parseEncodeTree(ast);
-
-		// calculate the activation of all tree nodes
-		model.treeActivation(encodeTree);
-
-		int[] output = new int[model.getFormat().getNumOutputs()];
-		for(int i = 0; i < model.getFormat().getNumOutputs(); i++){
-
-			// calculate the activation of an out node
-			OutputNode outNode = model.outActivation(encodeTree, i);
-			SimpleMatrix activation = outNode.getActivation();
-
-			// make the prediction (argmax of activation)
-			int index = MatrixUtil.argmax(activation);
-			output[i] = model.getFormat().getOutputOptions(i)[index];
-		}
-		return output;
-	}*/
 }

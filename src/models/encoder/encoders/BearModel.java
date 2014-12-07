@@ -88,26 +88,22 @@ public class BearModel implements Encoder{
 	//*                 LOG LOSS
 	//*********************************************************************************
 
-	@Override
-	public double logLoss(List<TestTriplet> tests) {
-		double sumLoss = 0;
-		for(TestTriplet t : tests) {
-			sumLoss += logLoss(t);
-		}
-		int m = (tests.size() * format.getNumOutputs());
-		return sumLoss / m;
-	}
-
 	public double logLoss(TestTriplet t) {
 		EncodeGraph encodeGraph = t.getEncodeGraph();
 		TreeNeuron runTree = encodeGraph.getRunEncodeTreeClone();
 		CodeVector cv = programEncoder.activateTree(runTree);
 		State output = t.getPostcondition();
 		double logLoss = outputDecoder.getLogLoss(output, cv.getVector());
+		double weightLoss = getWeightLoss();
 		if(Double.isNaN(logLoss)) {
 			throw new RuntimeException("nan loss");
 		}
-		return logLoss;
+		return logLoss + weightLoss;
+	}
+
+	private double getWeightLoss() {
+		return programEncoder.getWeightLoss() +
+				outputDecoder.getWeightLoss();
 	}
 
 	public StateDecoder getStateDecoder() {

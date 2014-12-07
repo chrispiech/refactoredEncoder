@@ -12,6 +12,7 @@ import minions.encoder.backprop.BearBackprop;
 import minions.encoder.factory.EncoderFactory;
 import minions.encoder.modelVector.ModelVector;
 import minions.minimizer.AdaGrad;
+import minions.minimizer.AdaGrad2;
 import minions.program.PostExperimentLoader;
 import minions.program.PrePostExperimentLoader;
 import models.code.TestTriplet;
@@ -24,7 +25,7 @@ public class BlockyMonkeyTrain {
 	
 	private static final String LANGUAGE = "blocky";
 	private static final String MODEL_TYPE = "monkey";
-	private static final String NAME = "gorilla";
+	private static final String NAME = "gorilla196";
 	
 	List<TestTriplet> trainSet = null;
 	List<TestTriplet> testSet = null;
@@ -32,15 +33,14 @@ public class BlockyMonkeyTrain {
 
 	private void run() {
 		System.out.println("hello world");
-		EncoderParams.setLanguage("blocky");
-		EncoderParams.setCodeVectorSize(100);
+		EncoderParams.setCodeVectorSize(9);
 		EncoderParams.setStateVectorSize(EncoderParams.getSqrtN());
 		// first, try to overfit
 		EncoderParams.setWeightDecay(0.0001);
 		FileSystem.setAssnId("Hoc18");
 		FileSystem.setExpId("prePostExp");
 		format = new ModelFormat(LANGUAGE, MODEL_TYPE);
-		trainSet = PrePostExperimentLoader.loadTests("train", -1, format.getLanguage());
+		trainSet = PrePostExperimentLoader.loadTriplets("train", 2000, format.getLanguage());
 		System.out.println("train set size: " + trainSet.size());
 		train();
 	}
@@ -50,7 +50,8 @@ public class BlockyMonkeyTrain {
 		double eta = EncoderParams.getLearningRate();
 		int miniBatchSize = 1000;
 		double[] loss = new double[epochs];
-		Encoder model = AdaGrad.minimize(format, trainSet, epochs, miniBatchSize, eta, loss, NAME);
+		Encoder model = AdaGrad2.train(format, trainSet, epochs, NAME);
+		//Encoder model = AdaGrad.minimize(format, trainSet, epochs, miniBatchSize, eta, loss, NAME);
 		EncoderSaver.save(model, NAME, EncoderSaver.makeNotes(trainSet, epochs));
 	}
 

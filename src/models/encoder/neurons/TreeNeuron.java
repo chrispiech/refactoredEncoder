@@ -1,6 +1,7 @@
 package models.encoder.neurons;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import models.blocky.BlockyHelper;
@@ -113,6 +114,19 @@ public class TreeNeuron extends Neuron {
 			acts.add(new CodeVector(child.getActivation()));
 		}
 		return acts;
+	}
+	
+	public boolean equals(Object o) {
+		TreeNeuron other = (TreeNeuron)o;
+		if(!type.equals(other.type)) return false;
+		return children.equals(other.children);
+	}
+	
+	public int hashCode() {
+		List<Object> objs = new LinkedList<Object>();
+		objs.add(type);
+		objs.addAll(children);
+		return objs.hashCode();
 	}
 	
 	public TreeNeuron getDescendant(String nodeId) {

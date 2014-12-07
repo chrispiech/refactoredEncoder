@@ -37,7 +37,6 @@ public class ProgramEncoder {
 			leafVectors.put(type, CodeVector.randomCodeVector());
 		}
 
-		
 		internalEncoders = new HashMap<String, InternalEncoder>();
 		for(String type : format.getInternalEncoderTypes()) {
 			int arity = format.getArity(type);
@@ -45,7 +44,7 @@ public class ProgramEncoder {
 			internalEncoders.put(type, encoder);
 		}
 	}
-	
+
 	/**
 	 * Method: Encoder Constructor
 	 * -------------------------
@@ -65,7 +64,7 @@ public class ProgramEncoder {
 	 */
 	public ProgramEncoder(ProgramEncoder toCopy) {
 		this.format = toCopy.format;
-		
+
 		leafVectors = new HashMap<String, CodeVector>();
 		for(String key : toCopy.leafVectors.keySet()) {
 			CodeVector value = toCopy.leafVectors.get(key);
@@ -81,7 +80,7 @@ public class ProgramEncoder {
 		}
 		return leafVectors.get(type);
 	}
-	
+
 	public void setLeafVector(String type, CodeVector leaf) {
 		leafVectors.put(type, leaf);
 	}
@@ -107,19 +106,19 @@ public class ProgramEncoder {
 	public Collection<InternalEncoder> getInternalEncoders() {
 		return internalEncoders.values();
 	}
-	
+
 	private Collection<CodeVector> getLeafVectors() {
 		return leafVectors.values();
 	}
-	
+
 	public ModelFormat getFormat() {
 		return format;
 	}
-	
+
 	public int getNorm() {
 		throw new RuntimeException("todo");
 	}
-	
+
 	@Override 
 	public boolean equals(Object o) {
 		ProgramEncoder other = (ProgramEncoder)o;
@@ -128,7 +127,7 @@ public class ProgramEncoder {
 			SimpleMatrix v2 = other.getLeafVector(type).getVector();
 			if(!MatrixUtil.equals(v1, v2)) return false;
 		}
-		
+
 		for(String type : format.getInternalEncoderTypes()) {
 			InternalEncoder e1 = getInternalEncoder(type);
 			InternalEncoder e2 = other.getInternalEncoder(type);
@@ -141,7 +140,7 @@ public class ProgramEncoder {
 	//*********************************************************************************
 	//*                 ACTIVATION
 	//*********************************************************************************
-	
+
 	/**
 	 * Method: Calculate Activation
 	 * ----------------------------
@@ -192,6 +191,23 @@ public class ProgramEncoder {
 			v.scale(d);
 		}
 	}
-	
-	
+
+	public double getWeightLoss() {
+		double loss = 0;
+		double lambda = EncoderParams.getWeightDecay();
+		for(String key : internalEncoders.keySet()) {
+			InternalEncoder encoder = internalEncoders.get(key);
+			for(int i = 0; i < encoder.getArity(); i++) {
+				SimpleMatrix W = encoder.getW(i);
+				loss += (lambda / 2.0) * MatrixUtil.norm(W);
+			}
+		}
+		for(String key : leafVectors.keySet()) {
+			SimpleMatrix v = leafVectors.get(key).getVector();
+			loss += (lambda / 2.0) * MatrixUtil.norm(v);
+		}
+		return loss;
+	}
+
+
 }

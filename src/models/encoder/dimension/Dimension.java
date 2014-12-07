@@ -78,7 +78,7 @@ public class Dimension {
 
 	public Pair<Integer, Integer> getMatrixDim(String key) {
 		Warnings.check(key.equals("beepers"));
-		return EncoderParams.getWorldDim();
+		return new Pair<Integer, Integer>(7,7);
 	}
 
 }

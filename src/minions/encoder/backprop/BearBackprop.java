@@ -28,37 +28,23 @@ public class BearBackprop {
 	private BearModel modelGrad = null;
 	private ModelFormat format;
 
-	public static Encoder derivative(BearModel m, List<TestTriplet> data) {
-		return new BearBackprop().getGrad(m, data);
+	public static Encoder derivative(BearModel model, List<TestTriplet> data) {
+		return new BearBackprop().getDerivative(model, data);
 	}
 
-	public static Encoder derivativeWithDecay(BearModel model, List<TestTriplet> data) {
-		return new BearBackprop().getGradWithDecay(model, data);
-	}
-
-	private Encoder getGrad(BearModel m, List<TestTriplet> data) {
-		this.model = m;
-		this.modelGrad = (BearModel)EncoderFactory.makeZero(model.getFormat());
-		this.format = model.getFormat();
-		calculateGradNoDecay(data);
-		return modelGrad;
-	}
-
-	private Encoder getGradWithDecay(BearModel model, List<TestTriplet> data) {
+	private Encoder getDerivative(BearModel model, List<TestTriplet> data) {
 		this.model = model;
 		this.modelGrad = (BearModel)EncoderFactory.makeZero(model.getFormat());
 		this.format = model.getFormat();
-		calculateGradNoDecay(data);
-		addWeightDecay(model);
-		return modelGrad;
-	}
-
-	private void calculateGradNoDecay(List<TestTriplet> data) {
 		for(TestTriplet test : data) {
 			addGradForTest(test);
 		}
-		int numOutputs = format.getNumOutputs();
-		modelGrad.scale(1.0 / (numOutputs * data.size()));
+		modelGrad.scale(1.0 / data.size());
+		
+		// this is equivalent to adding weight decay once per test and then 
+		// scaling weight decay with the rest of the grad by 1/data.size
+		addWeightDecay(); 
+		return modelGrad;
 	}
 
 	private void addGradForTest(TestTriplet test) {
@@ -119,7 +105,7 @@ public class BearBackprop {
 	//*********************************************************************************
 	//*                 WEIGHT DECAY
 	//*********************************************************************************
-	private void addWeightDecay(Encoder model) {
+	private void addWeightDecay() {
 		ProgramBackprop.addWeightDecay(
 				model.getProgramEncoder(), 
 				modelGrad.getProgramEncoder());

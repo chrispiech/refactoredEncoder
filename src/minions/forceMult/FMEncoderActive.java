@@ -12,7 +12,7 @@ import util.MatrixUtil;
 
 public class FMEncoderActive extends FMEncoder {
 
-	public FMEncoderActive(TreeMap<String, CodeVector> encodingMap) {
+	public FMEncoderActive(TreeMap<String, SimpleMatrix> encodingMap) {
 		super(encodingMap);
 		this.choser = new FMCluster(encodingMap);
 	}

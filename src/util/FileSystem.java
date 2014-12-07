@@ -24,7 +24,7 @@ import org.json.JSONObject;
 
 public class FileSystem {
 
-	private static final String dataDirPath = "../dataCleaned";
+	private static String dataDirPath = "../dataCleaned";
 
 	private static String assnId = null;
 	private static String expId = null;
@@ -299,6 +299,10 @@ public class FileSystem {
 
 	public static void createPath(File dir) {
 		dir.mkdirs();
+	}
+
+	public static void setDataDir(String path) {
+		FileSystem.dataDirPath = path;
 	}
 
 	/*

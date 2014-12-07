@@ -86,6 +86,23 @@ public class TestTriplet {
 	public String getId() {
 		return astId;
 	}
+	
+	public boolean equals(Object o) {
+		TestTriplet other = (TestTriplet)o;
+		if(!encodeGraph.equals(other.encodeGraph)) return false;
+		if(!precondition.equals(other.precondition)) return false;
+		if(!postcondition.equals(other.postcondition)) return false;
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		List<Object> objList = new LinkedList<Object>();
+		objList.add(precondition);
+		objList.add(postcondition);
+		objList.add(encodeGraph);
+		return objList.hashCode();
+	}
 
 	public EncodeGraph getEncodeGraph() {
 		return encodeGraph;

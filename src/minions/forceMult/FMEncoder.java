@@ -13,17 +13,18 @@ import models.math.LogRegression;
 import org.ejml.simple.SimpleMatrix;
 
 import util.MatrixUtil;
+import util.Warnings;
 
 public class FMEncoder implements FMMinion, CodeVectorLogistic{
 	protected FMChoser choser = null;
 	private List<LogRegression> classifiers = null;
-	private Map<String, CodeVector> encodingMap = null;
+	private Map<String, SimpleMatrix> encodingMap = null;
 	private Map<String, List<Boolean>> gradedMap = null;
 
 	private int numFeedbacks = 0;
 
-	public FMEncoder(TreeMap<String, CodeVector> encodingMap) {
-		this.encodingMap = encodingMap;
+	public FMEncoder(TreeMap<String, SimpleMatrix> encodingMap2) {
+		this.encodingMap = encodingMap2;
 	}
 
 	@Override
@@ -85,8 +86,8 @@ public class FMEncoder implements FMMinion, CodeVectorLogistic{
 	}
 	
 	public SimpleMatrix getFeatures(String id) {
-		CodeVector cv = encodingMap.get(id);
-		return cv.getVector().transpose();
+		SimpleMatrix cv = encodingMap.get(id);
+		return cv.transpose();
 	}
 
 	private SimpleMatrix getLabelMatrix(int index) {
@@ -103,7 +104,7 @@ public class FMEncoder implements FMMinion, CodeVectorLogistic{
 
 	private SimpleMatrix getFeatureMatrix() {
 		int rows = gradedMap.size();
-		int cols = EncoderParams.getCodeVectorSize();
+		int cols = getNumFeatures();
 		SimpleMatrix featureMatrix = new SimpleMatrix(rows, cols);
 		int r = 0;
 		for(String id : gradedMap.keySet()) {
@@ -112,6 +113,12 @@ public class FMEncoder implements FMMinion, CodeVectorLogistic{
 			r++;
 		}
 		return featureMatrix;
+	}
+
+	private int getNumFeatures() {
+		SimpleMatrix sample = encodingMap.values().iterator().next();
+		Warnings.check(sample.isVector());
+		return sample.getNumElements();
 	}
 
 	@Override

@@ -52,6 +52,13 @@ public class MatrixDecoder extends ValueDecoder {
 		return new ValueNeuron(z, a, key);
 	}
 	
+	public SimpleMatrix decodeMatrix(SimpleMatrix cv) {
+		SimpleMatrix z = getZ(cv);
+		SimpleMatrix a = getActivation(z);
+		a.reshape(rows, cols);
+		return a;
+	}
+	
 	@Override
 	public double logLoss(State state, SimpleMatrix stateVector) {
 		SimpleMatrix z = getZ(stateVector);

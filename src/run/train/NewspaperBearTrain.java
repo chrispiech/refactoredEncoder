@@ -19,7 +19,7 @@ import models.encoder.ModelFormat;
 import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
 
-public class NewspaperTrain {
+public class NewspaperBearTrain {
 	
 	private static final String LANGUAGE = "karel";
 	private static final String MODEL_TYPE = "bear";
@@ -31,7 +31,6 @@ public class NewspaperTrain {
 
 	private void run() {
 		format = new ModelFormat(LANGUAGE, MODEL_TYPE);
-		EncoderParams.setLanguage(LANGUAGE);
 		EncoderParams.setCodeVectorSize(40);
 		FileSystem.setAssnId("Newspaper");
 		FileSystem.setExpId("postExp");
@@ -61,7 +60,7 @@ public class NewspaperTrain {
 	
 	
 	public static void main(String[] args) {
-		new NewspaperTrain().run();
+		new NewspaperBearTrain().run();
 	}
 	
 }

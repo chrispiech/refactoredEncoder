@@ -24,12 +24,11 @@ public class BlockyMonkeyCheck {
 
 	private void run() {
 		System.out.println("hello world");
-		EncoderParams.setLanguage("blocky");
 		EncoderParams.setCodeVectorSize(9);
 		FileSystem.setAssnId("Hoc18");
 		FileSystem.setExpId("prePostExp");
 		format = new ModelFormat(LANGUAGE, MODEL_TYPE);
-		trainSet = PrePostExperimentLoader.loadTests("train", 5000, format.getLanguage());
+		trainSet = PrePostExperimentLoader.loadTriplets("train", 5000, format.getLanguage());
 		
 		
 		List<TestTriplet> simple = new ArrayList<TestTriplet>();

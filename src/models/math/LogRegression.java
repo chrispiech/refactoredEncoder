@@ -55,8 +55,12 @@ public class LogRegression {
 				System.out.println("finished in " + i + " iterataion");
 				break;
 			}
+			if(i == MAX_ITERATIONS - 1) {
+				System.out.println("finished in " + i + " iterataion");
+			}
 			//if(i % 1000 == 0) System.out.println(i + ": " + gradSize);
 		}
+		
 	}
 	
 	public void trainBFGS(SimpleMatrix f, SimpleMatrix labels) {

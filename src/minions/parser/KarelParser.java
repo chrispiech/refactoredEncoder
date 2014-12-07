@@ -63,7 +63,6 @@ public class KarelParser extends EncodeTreeParser {
 	}
 
 	public static void main(String [] args) {
-		EncoderParams.setLanguage("karel");
 		FileSystem.setAssnId("Midpoint");
 		FileSystem.setExpId("postExp");
 		System.out.println("Testing the Encode Tree Parser...");

@@ -65,8 +65,7 @@ public class ProgramVector {
 		int programVecSize = internalSize + f.getLeafDimension();
 		
 		if(i < internalSize) {
-			//return "internal";
-			throw new RuntimeException("were on the hunt for this");
+			return "internal";
 		} else if (i < programVecSize) {
 			int leafIndex = i - internalSize;
 			List<String> types = f.getLeafTypes();

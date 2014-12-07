@@ -124,4 +124,14 @@ public class BlockyLanguage implements Language{
 		return false;
 	}
 
+	@Override
+	public boolean isKarel() {
+		return false;
+	}
+
+	@Override
+	public boolean isBlocky() {
+		return true;
+	}
+
 }

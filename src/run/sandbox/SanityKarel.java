@@ -30,7 +30,6 @@ public class SanityKarel {
 
 	private void run() {
 		EncoderParams.setCodeVectorSize(50);
-		EncoderParams.setLanguage("karel");
 		FileSystem.setAssnId("Newspaper");
 		FileSystem.setExpId("postExp");
 		List<TestTriplet>testSet = PostExperimentLoader.loadFolds("homeWorld", 1, new KarelLanguage());

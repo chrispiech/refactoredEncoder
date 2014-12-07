@@ -11,9 +11,9 @@ import util.MatrixUtil;
 
 public class FMEncoderRandom extends FMEncoder{
 
-	public FMEncoderRandom(TreeMap<String, CodeVector> encodingMap) {
+	public FMEncoderRandom(TreeMap<String, SimpleMatrix> encodingMap, int seed) {
 		super(encodingMap);
-		this.choser = new FMRandomChoser(encodingMap.keySet());
+		this.choser = new FMRandomChoser(encodingMap.keySet(), seed);
 	}
 
 

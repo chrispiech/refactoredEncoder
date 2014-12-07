@@ -10,8 +10,6 @@ import models.encoder.ModelFormat;
 import models.encoder.decoders.ValueDecoder;
 
 public interface Encoder {
-
-	public double logLoss(List<TestTriplet> tests);
 	
 	public double logLoss(TestTriplet test);
 	

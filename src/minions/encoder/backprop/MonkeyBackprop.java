@@ -26,36 +26,34 @@ import models.encoder.neurons.TreeNeuron;
 public class MonkeyBackprop {
 
 	public static Encoder derivative(MonkeyModel model, List<TestTriplet> list) {
-		return new MonkeyBackprop().getGradNoDecay(model, list);
+		return new MonkeyBackprop().getDerivative(model, list);
 	}
 
 	public static Encoder derivativeWithDecay(MonkeyModel model,
 			List<TestTriplet> list) {
-		return new MonkeyBackprop().getGradWithDecay(model, list);
+		return new MonkeyBackprop().getDerivative(model, list);
 	}
 
 	protected MonkeyModel model = null;
 	protected MonkeyModel modelGrad = null;
 	protected ModelFormat format = null;
 
-	protected Encoder getGradNoDecay(MonkeyModel model, List<TestTriplet> data) {
-		this.model = model;
-		this.format = model.getFormat();
-		this.modelGrad = (MonkeyModel)EncoderFactory.makeZero(model.getFormat());
-		calculateGradNoDecay(data);
-		return modelGrad;
-	}
-
-	protected Encoder getGradWithDecay(MonkeyModel model, List<TestTriplet> data) {
+	protected Encoder getDerivative(MonkeyModel model, List<TestTriplet> data) {
 		this.model = model;
 		this.modelGrad = (MonkeyModel)EncoderFactory.makeZero(model.getFormat());
 		this.format = model.getFormat();
-		calculateGradNoDecay(data);
-		addWeightDecay(model);
+		for(TestTriplet test : data) {
+			addGradForTest(test);
+		}
+		modelGrad.scale(1.0 / data.size());
+		
+		// this is equivalent to adding weight decay once per test and then 
+		// scaling weight decay with the rest of the grad by 1/data.size
+		addWeightDecay(); 
 		return modelGrad;
 	}
 
-	protected void addWeightDecay(MonkeyModel model2) {
+	protected void addWeightDecay() {
 		ProgramBackprop.addWeightDecay(
 				model.getProgramEncoder(), 
 				modelGrad.getProgramEncoder());

@@ -19,7 +19,6 @@ import util.MatrixUtil;
 public class NewspaperTest {
 
 	private void run() {
-		EncoderParams.setLanguage("karel");
 		EncoderParams.setCodeVectorSize(40);
 		EncoderParams.setWorldDim(5, 7);
 		FileSystem.setAssnId("Newspaper");

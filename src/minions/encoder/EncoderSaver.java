@@ -20,9 +20,31 @@ import models.encoder.encoders.Encoder;
 import org.ejml.simple.SimpleMatrix;
 
 import util.FileSystem;
+import util.Warnings;
 
 
 public class EncoderSaver {
+	
+	public static File save(double[] modelVec, ModelFormat format, String modelDirName, String modelName, String notes) {
+
+		File expDir = FileSystem.getExpDir();
+		File savedModelsDir = new File(expDir, "savedModels");
+		File modelDir = new File(savedModelsDir, modelDirName);
+		File modelEpochDir = new File(modelDir, modelName);
+
+		FileSystem.createPath(modelEpochDir);
+
+		// save the model
+		saveModel(modelVec, modelEpochDir);
+
+		// save the format
+		saveFormat(format, modelEpochDir);
+
+		// save any notes
+		FileSystem.createFile(modelEpochDir, "notes.txt", notes);
+		System.out.println("model saved: " + modelDir.getPath());
+		return modelEpochDir;
+	}
 
 	public static File save(double[] modelVec, ModelFormat format, String fileNamePrefix, String notes) {
 		DateFormat dateFormat = new SimpleDateFormat("MM-dd-HH-mm-ss");
@@ -58,6 +80,7 @@ public class EncoderSaver {
 		File expDir = FileSystem.getExpDir();
 		File modelsDir = new File(expDir, "savedModels");
 		File modelDir = new File(modelsDir, name);
+		Warnings.check(modelDir.exists(), "no model dir: " + modelDir.getAbsolutePath());
 
 		ModelFormat format = loadFormat(modelDir);
 
@@ -83,7 +106,9 @@ public class EncoderSaver {
 		formatStr += "language:" +format.getLanguageName() + "\n";
 		formatStr += "modelType:" + format.getModelType() + "\n";
 		formatStr += "codeVectorSize:" + EncoderParams.getCodeVectorSize() +"\n";
-		formatStr += "stateVectorSize:" + EncoderParams.getStateVectorSize();
+		if(EncoderParams.hasStateVectorSize()) {
+			formatStr += "stateVectorSize:" + EncoderParams.getStateVectorSize();
+		}
 		FileSystem.createFile(modelDir, "format.txt", formatStr);
 	}
 
@@ -103,7 +128,7 @@ public class EncoderSaver {
 		}
 		return new ModelFormat(language, modelType);
 	}
-	
+
 	private static Map<String, String> getFormatMap(List<String> lines) {
 		Map<String, String> formatMap = new HashMap<String, String>();
 		for(String line : lines) {
@@ -136,16 +161,20 @@ public class EncoderSaver {
 
 	public static String makeNotes(List<TestTriplet> trainSet, int epochs) {
 		String notes = "";
-		notes += "train set size: " + trainSet.size() + "\n";
 		notes += "epochs: " + epochs + "\n";
 		notes += "learning rate: " + EncoderParams.getLearningRate() + "\n";
 		notes += "weight decay: " + EncoderParams.getWeightDecay() + "\n";
+		return notes;
 
-		if(EncoderParams.getDepthLimit() > 0) {
-			notes += "depth limited: " + EncoderParams.getDepthLimit() + "\n";
-		} else {
-			notes += "depth limited: no\n";
-		}
+	}
+	
+	public static String makeNotes(List<TestTriplet> trainSet) {
+		String notes = "";
+		notes += "learning rate: " + EncoderParams.getLearningRate() + "\n";
+		notes += "weight decay: " + EncoderParams.getWeightDecay() + "\n";
+		notes += "codeVec size: " + EncoderParams.getCodeVectorSize() + "\n";
+		notes += "stateVec size: " + EncoderParams.getStateVectorSize() + "\n";
+		notes += "miniBatch size: " + EncoderParams.getMiniBatchSize() + "\n";
 		return notes;
 
 	}

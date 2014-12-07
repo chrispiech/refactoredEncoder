@@ -62,7 +62,8 @@ public class AdaGrad {
 
 		System.out.println();
 		System.out.println("Traning in progress ...");
-
+		System.out.println("size: " + train.size());
+		
 		double numMiniBatches = Math.ceil(1.0 * train.size() / miniBatchSize);
 		double numMiniBatchUpdates = epochs * numMiniBatches;
 		int updatesDone = 0;
@@ -82,17 +83,16 @@ public class AdaGrad {
 				if(checkGrad) {
 					checkGrad(miniBatches, t, model);
 				}
-				Encoder grad = EncoderBackprop.derivativeWithDecay(model, miniBatches.get(t));
+				Encoder grad = EncoderBackprop.derivative(model, miniBatches.get(t));
 				double[] gradVec =  ModelVector.modelToVec(grad);
 				for(int i = 0; i < gradVec.length; i++) {
+					if(gradVec[i] == 0) continue;
 					gradStore[i] += Math.pow(gradVec[i], 2);
-					double weight = 0;
-					if(gradStore[i] != 0) {
-						weight = eta/Math.sqrt(gradStore[i]);
-					}
+					double weight = eta/Math.sqrt(gradStore[i]);
 					x[i] = (x[i] - weight*gradVec[i]);
 				}
-				final long miniBatchEnd = System.currentTimeMillis();
+				
+				/*final long miniBatchEnd = System.currentTimeMillis();
 				updatesDone++;
 				double algoDone = (100.0 * updatesDone / numMiniBatchUpdates);
 				double todo = numMiniBatchUpdates - updatesDone;
@@ -106,7 +106,7 @@ public class AdaGrad {
 				System.out.println("  algo elapsed time: " + algoTime +"s");
 				System.out.println("  algo % complete:   " + algoDone );
 				System.out.println("  time to complete:  " + timeToComplete + "s");
-				System.out.println("");
+				System.out.println("");*/
 			}
 
 			double value = valueAt(format, x, train);
@@ -155,6 +155,6 @@ public class AdaGrad {
 
 	private static double valueAt(ModelFormat format, double[] params, List<TestTriplet> train) {
 		Encoder model = getModel(format, params);
-		return ModelValueAt.valueAtWithDecay(model, train);
+		return ModelValueAt.valueAt(model, train);
 	}
 }

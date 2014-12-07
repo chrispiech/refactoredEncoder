@@ -32,7 +32,6 @@ public class BlockyPenguinTrain {
 
 	private void run() {
 		System.out.println("hello world");
-		EncoderParams.setLanguage("blocky");
 		EncoderParams.setCodeVectorSize(100);
 		EncoderParams.setStateVectorSize(10);
 		// first, try to overfit
@@ -41,7 +40,7 @@ public class BlockyPenguinTrain {
 		FileSystem.setAssnId("Hoc18");
 		FileSystem.setExpId("prePostExp");
 		format = new ModelFormat(LANGUAGE, MODEL_TYPE);
-		trainSet = PrePostExperimentLoader.loadTests("train", -1, format.getLanguage());
+		trainSet = PrePostExperimentLoader.loadTriplets("train", -1, format.getLanguage());
 		System.out.println("train set size: " + trainSet.size());
 		train();
 	}

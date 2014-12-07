@@ -90,4 +90,13 @@ public class StateEncoder {
 		return wMap.keySet();
 	}
 
+	public double getWeightLoss() {
+		double loss = 0;
+		for(String key : wMap.keySet()) {
+			SimpleMatrix W = wMap.get(key);
+			loss += (EncoderParams.getWeightDecay() / 2.0) * MatrixUtil.norm(W);
+		}
+		return loss;
+	}
+
 }

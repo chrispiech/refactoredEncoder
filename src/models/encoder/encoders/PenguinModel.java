@@ -44,16 +44,6 @@ public class PenguinModel implements Encoder, StateEncodable  {
 	}
 
 	@Override
-	public double logLoss(List<TestTriplet> tests) {
-		double sumLoss = 0;
-		for(TestTriplet t : tests) {
-			sumLoss += logLoss(t);
-		}
-		int m = (tests.size() * format.getNumOutputs());
-		return sumLoss / m;
-	}
-
-	@Override
 	public double logLoss(TestTriplet t) {
 		State pre = t.getPrecondition();
 		State post = t.getPostcondition();

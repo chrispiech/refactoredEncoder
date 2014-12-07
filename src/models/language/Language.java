@@ -33,4 +33,8 @@ public interface Language {
 
 	String getName();
 
+	boolean isKarel();
+
+	boolean isBlocky();
+
 }

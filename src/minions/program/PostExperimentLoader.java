@@ -98,6 +98,7 @@ public class PostExperimentLoader {
 			String testJsonStr = FileSystem.getFileContents(f);
 			JSONObject json = new JSONObject(testJsonStr);
 			TestTriplet test = loadJson(json, language);
+			if(test == null) continue;
 			tests.add(test);
 			
 			int numLoaded = tests.size();
@@ -126,6 +127,7 @@ public class PostExperimentLoader {
 			pre = loadBlockyState(json.getJSONArray("pre"));
 			post = loadBlockyState(json.getJSONArray("post"));
 		} else {
+			pre = loadKarelState(json.getJSONObject("pre"));
 			post = loadKarelState(json.getJSONObject("post"));
 		}
 		return new TestTriplet(pre, post, graph, astId, count);

@@ -69,6 +69,8 @@ public class KarelLanguage implements Language{
 		stateKeys.add("row");
 		stateKeys.add("col");
 		stateKeys.add("status");
+		stateKeys.add("worldRows");
+		stateKeys.add("worldCols");
 		stateKeys.add("direction");
 		stateKeys.add("beepers");
 	}
@@ -87,6 +89,8 @@ public class KarelLanguage implements Language{
 	{
 		outputType.put("row", "number");
 		outputType.put("col", "number");
+		outputType.put("worldRows", "number");
+		outputType.put("worldCols", "number");
 		outputType.put("status", "choice");
 		outputType.put("direction", "choice");
 		outputType.put("beepers", "matrix");
@@ -123,7 +127,7 @@ public class KarelLanguage implements Language{
 
 	@Override
 	public int getNumOutputOptions(String key) {
-		Warnings.check(getOutputType(key).equals("choice"), "no");
+		Warnings.check(getOutputType(key).equals("choice"));
 		return outputOptions.get(key).length;
 	}
 
@@ -134,7 +138,7 @@ public class KarelLanguage implements Language{
 
 	@Override
 	public String[] getChoiceOptions(String key) {
-		Warnings.check(getOutputType(key).equals("choice"), "no");
+		Warnings.check(getOutputType(key).equals("choice"));
 		return outputOptions.get(key);
 	}
 
@@ -158,6 +162,16 @@ public class KarelLanguage implements Language{
 	@Override
 	public boolean isMethodInvocation(String type) {
 		return type.startsWith("method");
+	}
+
+	@Override
+	public boolean isKarel() {
+		return true;
+	}
+
+	@Override
+	public boolean isBlocky() {
+		return false;
 	}
 
 

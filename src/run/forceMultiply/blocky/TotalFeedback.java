@@ -1,4 +1,4 @@
-package run.forceMultiply;
+package run.forceMultiply.blocky;
 
 import java.io.File;
 import java.util.*;
@@ -7,6 +7,7 @@ import minions.encoder.EncoderSaver;
 import minions.forceMult.FMEncoderActive;
 import minions.forceMult.FMEncoderRandom;
 import minions.forceMult.FMMinion;
+import minions.forceMult.FMRandomChoser;
 import minions.forceMult.ForceMultiplier;
 import minions.parser.EncodeGraphParser;
 import minions.program.PostExperimentLoader;
@@ -17,6 +18,8 @@ import models.encoder.EncodeGraph;
 import models.encoder.EncoderParams;
 import models.encoder.encoders.Encoder;
 import models.encoder.neurons.TreeNeuron;
+import models.language.BlockyLanguage;
+import models.language.KarelLanguage;
 import models.language.Language;
 
 import org.ejml.simple.SimpleMatrix;
@@ -26,70 +29,38 @@ import org.json.JSONObject;
 import util.FileSystem;
 import util.RandomUtil;
 
-public class ForceMultiplyFeedback {
-
-	private static final int NUM_PROGRAMS = -1;
-	private static final int[] BUDGETS = {
-		500
-	};
-
+public class TotalFeedback {
 
 	private void run() {
-		
-		RandomUtil.setSeed(0);
 
-		EncoderParams.setLanguage("blocky");
-		EncoderParams.setCodeVectorSize(100);
 		FileSystem.setAssnId("Hoc18");
-		
+
 		// but the feedback lives in the feedbackExp :)
-		System.out.println("loading...");
+		System.out.println("loading feedback...");
 		FileSystem.setExpId("feedbackExp");
 		Map<String, List<Integer>> feedbackMap = loadFeedback();
 
-		// the programs came from the start experiment!
 		FileSystem.setExpId("postExp");
-		Encoder model = EncoderSaver.load("alyssa");
+		Map<String, TestTriplet> programMap = loadPrograms(new BlockyLanguage());
 		
-		FileSystem.setExpId("postExp");
-		Map<String, TestTriplet> programMap = loadPrograms(model);
-		TreeMap<String, CodeVector> encodingMap = makeEncodingMap(programMap, model);
-
-
-		Set<String> toGrade = encodingMap.keySet();
+		Set<String> toGrade = programMap.keySet();
 		System.out.println("num programs: " + toGrade.size());
 
-		System.out.println("running active learning!");
-		for(int budget : BUDGETS) {
-			System.out.println("budget: " + budget);
-			FMMinion minion = new FMEncoderRandom(encodingMap);
-			ForceMultiplier force = new ForceMultiplier(minion, feedbackMap, toGrade);
-			force.run(budget);
+		int total = 0;
+		for(String id : toGrade) {
+			total += feedbackMap.get(id).size();
 		}
+		System.out.println("total: " + total);
 	}
 
-	private TreeMap<String, CodeVector> makeEncodingMap(
-			Map<String, TestTriplet> programMap, Encoder model) {
-		TreeMap<String, CodeVector> encodingMap = new TreeMap<String, CodeVector>();
-		for(String id : programMap.keySet()) {
-			TestTriplet test = programMap.get(id);
-			try{
-				CodeVector cv = model.getCodeVector(test);
-				encodingMap.put(id, cv);
-			} catch(RuntimeException e) {
-				System.out.println("ERROR PARSING: " + id);
-			}
-			
-		}
-		return encodingMap;
-	}
 
-	private Map<String, TestTriplet> loadPrograms(Encoder model) {
-		Language lang = model.getFormat().getLanguage();
-		List<TestTriplet> tests = PostExperimentLoader.load(NUM_PROGRAMS, lang);
+	private Map<String, TestTriplet> loadPrograms(Language lang) {
+		List<TestTriplet> tests =PostExperimentLoader.load(-1, lang);
 		Map<String, TestTriplet> programMap = new TreeMap<String, TestTriplet>();
 		for(TestTriplet t : tests) {
-			programMap.put(t.getId(), t);
+			if(!t.getEncodeGraph().hasCycles()) {
+				programMap.put(t.getId(), t);
+			}
 		}
 		return programMap;
 	}
@@ -112,8 +83,7 @@ public class ForceMultiplyFeedback {
 		}
 		return feedbackMap;
 	}
-
 	public static void main(String[] args) {
-		new ForceMultiplyFeedback().run();
+		new TotalFeedback().run();
 	}
 }

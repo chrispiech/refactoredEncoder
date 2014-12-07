@@ -3,28 +3,62 @@ package minions.forceMult;
 import java.util.*;
 
 import models.encoder.CodeVector;
+import models.math.PCA;
 
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.ejml.simple.SimpleMatrix;
 
+import util.MatrixUtil;
 import util.PQueue;
+import util.Warnings;
 
 public class FMCluster implements FMChoser{
 
 	private int K = -1;
-	private int MAX_ITERATIONS = 10;
+	private int RANDOM_RESTARTS = 3;
+	private int NUM_BASIS = 30;
+	private int SUBSAMPLE = -1;
 
+	private static final boolean USE_PCA = false;
+
+	// actual instance variables
 	private Queue<String> toGrade = new LinkedList<String>();
-
 	private Map<CodeVector, String> reverseEncoding = null;
 
-	public FMCluster(Map<String, CodeVector> encodingMap) {
+	public FMCluster(TreeMap<String, SimpleMatrix> encodingMap) {
+		System.out.println("running pca...");
+
+		PCA pca = null;
+		if(USE_PCA) {
+			pca = new PCA();
+			long startTime = System.currentTimeMillis();
+			pca.setup(encodingMap.size(), getSampleSize(encodingMap));
+			for(String id : encodingMap.keySet()) {
+				SimpleMatrix encoding = encodingMap.get(id);
+				pca.addSample(MatrixUtil.asVector(encoding));
+			}
+			pca.computeBasis(NUM_BASIS);
+			long endTime = System.currentTimeMillis();
+			System.out.println("pca time: " + (endTime -startTime) + "ms");
+		}
+
 		reverseEncoding = new HashMap<CodeVector, String>();
 		for(String id : encodingMap.keySet()) {
-			reverseEncoding.put(encodingMap.get(id), id);
+			SimpleMatrix encoding = encodingMap.get(id);
+			if(USE_PCA) {
+				double[] p = pca.sampleToEigenSpace(MatrixUtil.asVector(encoding));
+				encoding = MatrixUtil.asSimpleMatrix(p);
+			}
+			reverseEncoding.put(new CodeVector(encoding), id);
 		}
+
+	}
+
+	private int getSampleSize(TreeMap<String, SimpleMatrix> encodingMap) {
+		String first = encodingMap.keySet().iterator().next();
+		return encodingMap.get(first).getNumElements();
 	}
 
 	public void update(String id, List<Boolean> feedback) {
@@ -51,17 +85,31 @@ public class FMCluster implements FMChoser{
 			List<CodeVector> cluster = centroid.getPoints();
 			Clusterable center = centroid.getCenter();
 			String id = getMedioidId(center, cluster);
+			Warnings.check(id != null);
 			toGrade.add(id);
 		}
+
 		System.out.println("done clustering.");
 	}
 
-	private List<CentroidCluster<CodeVector>> cluster(List<CodeVector> points) {
-		int randomRestarts = 10;
+	private List<CentroidCluster<CodeVector>> cluster(List<CodeVector> data) {
+
+		List<CodeVector> points = new LinkedList<CodeVector>();
+
+		if(SUBSAMPLE < 0) {
+			points.addAll(data);
+		} else {
+			Collections.shuffle(data);
+			for(int i = 0; i < Math.min(SUBSAMPLE, data.size()); i++) {
+				points.add(data.get(i));
+			}
+		}
+
 		List<CentroidCluster<CodeVector>> best = null;
 		double minLoss = 0;
-		for(int i = 0; i < randomRestarts; i++) {
-			System.out.println("k-means restart: " + i);
+		for(int i = 0; i < RANDOM_RESTARTS; i++) {
+			System.out.println("kmeans restart: " + i);
+			long startTime = System.currentTimeMillis();
 			KMeansPlusPlusClusterer<CodeVector> kMeans = 
 					new KMeansPlusPlusClusterer<CodeVector>(K, 100);
 			List<CentroidCluster<CodeVector>> centroids = kMeans.cluster(points);
@@ -70,6 +118,9 @@ public class FMCluster implements FMChoser{
 				best = centroids;
 				minLoss = loss;
 			}
+			long endTime = System.currentTimeMillis();
+			System.out.println("kmeans time: " + (endTime -startTime) + "ms");
+
 		}
 		System.out.println("kmeans loss: " + minLoss);
 		return best;
@@ -108,6 +159,7 @@ public class FMCluster implements FMChoser{
 				min = d;
 			}
 		}
+		Warnings.check(argMin != null);
 		return reverseEncoding.get(argMin);
 	}
 

@@ -9,6 +9,7 @@ import org.ejml.simple.SimpleMatrix;
 
 import util.DirectedGraph;
 import util.IdCounter;
+import util.Warnings;
 
 
 public class EncodeGraph {
@@ -91,6 +92,33 @@ public class EncodeGraph {
 			children.add(flatTree(child, counter));
 		}
 		return new TreeNeuron(tree.getType(), children, id);
+	}
+	
+	public boolean equals(Object o) {
+		EncodeGraph other = (EncodeGraph)o;
+		return methods.equals(other.methods);
+	}
+	
+	public int hashCode(){
+		return methods.hashCode();
+	}
+
+	/**
+	 * Method: Get Effective Tree
+	 * --------------------------
+	 * Finds the nodeId and makes a tree of all the commands that 
+	 * were called.
+	 */
+	public TreeNeuron getEffectiveTree(String nodeId) {
+		TreeNeuron root = null;
+		for(String name : methods.keySet()) {
+			TreeNeuron body = methods.get(name);
+			root = body.getDescendant(nodeId);
+			if(root != null) break;
+		}
+		Warnings.check(root != null);
+		TreeNeuron effectiveTree = flatTree(root, new IdCounter());
+		return effectiveTree;
 	}
 	
 	

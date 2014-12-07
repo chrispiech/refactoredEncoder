@@ -12,13 +12,12 @@ import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
 import models.encoder.encoders.Encoder;
 import models.language.BlockyLanguage;
-import run.train.NewspaperTrain;
+import run.train.NewspaperBearTrain;
 import util.FileSystem;
 
 public class BlockyGrad {
 	private void run() {
 		System.out.println("hello world");
-		EncoderParams.setLanguage("blocky");
 		EncoderParams.setCodeVectorSize(2);
 		FileSystem.setAssnId("Hoc18");
 		FileSystem.setExpId("postExp");

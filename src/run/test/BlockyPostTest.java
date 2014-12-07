@@ -19,12 +19,11 @@ import util.MatrixUtil;
 public class BlockyPostTest {
 
 	private void run() {
-		EncoderParams.setLanguage("blocky");
 		EncoderParams.setCodeVectorSize(10);
 		FileSystem.setAssnId("Hoc18");
 		FileSystem.setExpId("postExp");
-		Encoder model = EncoderSaver.load("small");
-		List<TestTriplet>testSet = PostExperimentLoader.loadTests("test", 1000, new BlockyLanguage());
+		Encoder model = EncoderSaver.load("brown2-epoch10");
+		List<TestTriplet>testSet = PostExperimentLoader.loadTests("train", -1, new BlockyLanguage());
 		//testModel(model, testSet, 1000);
 		//testModel(model, testSet, 5000);
 		testModel(model, testSet, testSet.size());

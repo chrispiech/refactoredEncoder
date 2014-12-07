@@ -24,7 +24,6 @@ public class BlockyPrePostTest {
 	pygmy-epoch1*/
 	
 	private void run() {
-		EncoderParams.setLanguage("blocky");
 		FileSystem.setAssnId("Hoc18");
 
 		FileSystem.setExpId("postExp"); 

@@ -33,16 +33,6 @@ public class MonkeyModel implements Encoder, StateEncodable {
 		this.stateDecoder = output;
 		this.stateEncoder = input;
 	}
-
-	@Override
-	public double logLoss(List<TestTriplet> tests) {
-		double sumLoss = 0;
-		for(TestTriplet t : tests) {
-			sumLoss += logLoss(t);
-		}
-		int m = (tests.size() * format.getNumOutputs());
-		return sumLoss / m;
-	}
 	
 	@Override
 	public double logLoss(TestTriplet t) {
@@ -54,13 +44,23 @@ public class MonkeyModel implements Encoder, StateEncodable {
 		SimpleMatrix postVector = getPostVector(pre, runTree);
 
 		double logLoss = 0;
+		
 		logLoss += stateDecoder.getLogLoss(pre, preVector);
 		logLoss += stateDecoder.getLogLoss(post, postVector);
+		logLoss += getWeightLoss();
 		
 		if(Double.isNaN(logLoss)) {
 			throw new RuntimeException("nan loss");
 		}
 		return logLoss;
+	}
+
+	private double getWeightLoss() {
+		double weightLoss = 0;
+		weightLoss += programEncoder.getWeightLoss();
+		weightLoss += stateDecoder.getWeightLoss();
+		weightLoss += stateEncoder.getWeightLoss();
+		return weightLoss;
 	}
 
 	@Override

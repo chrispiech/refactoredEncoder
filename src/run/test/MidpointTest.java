@@ -19,7 +19,6 @@ import util.MatrixUtil;
 public class MidpointTest {
 
 	private void run() {
-		EncoderParams.setLanguage("karel");
 		//EncoderParams.setCodeVectorSize(40);
 		EncoderParams.setWorldDim(6, 6);
 		FileSystem.setAssnId("Midpoint");

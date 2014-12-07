@@ -31,7 +31,6 @@ public class MidpointTrain {
 
 	private void run() {
 		format = new ModelFormat(LANGUAGE, MODEL_TYPE);
-		EncoderParams.setLanguage(LANGUAGE);
 		EncoderParams.setCodeVectorSize(40);
 		FileSystem.setAssnId("Midpoint");
 		FileSystem.setExpId("postExp");

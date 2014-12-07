@@ -8,10 +8,11 @@ import java.util.TreeMap;
 
 import org.ejml.simple.SimpleMatrix;
 
+import util.Warnings;
 import edu.stanford.nlp.util.Pair;
 
 public class ForceMultiplier {
-	
+
 	private static final double ACC_THRESHOLD = 0.9;
 
 	private FMMinion minion;
@@ -44,9 +45,9 @@ public class ForceMultiplier {
 	 * Force multiply teacher grading, given a budget. Report how well
 	 * you do.
 	 */
-	public void run(int budget) {
+	public double run(int budget) {
 		minion.setBudget(budget);
-		
+
 		// populate datasets...
 		getFeedback(budget);
 
@@ -58,10 +59,17 @@ public class ForceMultiplier {
 
 		// lets get a best score
 		//double bestScore = getScore(incorrectCorrect);
+		double numProp = reportResults(incorrectCorrect);
+
+		return numProp;
+	}
+
+	private double reportResults(List<Pair<Double, Double>> incorrectCorrect) {
 		double numProp = argMaxScore(incorrectCorrect);
 		//System.out.println("best score: " + bestScore);
 		int thresold = (int) (ACC_THRESHOLD * 100);
 		System.out.println("num propagated at " + thresold + "% " + numProp);
+		return numProp;
 	}
 
 	private double argMaxScore(List<Pair<Double, Double>> icList) {
@@ -132,8 +140,9 @@ public class ForceMultiplier {
 		System.out.println("precision recall");
 		System.out.println("incorrect, correct");
 		System.out.println("-----");
-		for(double threshold = 0.80; threshold <= 1.0; threshold += 0.001) {
-			Pair<Double, Double> ic = getIncorrectCorrect(threshold);
+		for(int i = 0; i < 200; i++) {
+			double t = getThreshold(i);
+			Pair<Double, Double> ic = getIncorrectCorrect(t);
 			prCurve.add(ic);
 			double inc = ic.first();
 			double cor = ic.second();
@@ -145,6 +154,25 @@ public class ForceMultiplier {
 		System.out.println(baseline.first() + "\t" + baseline.second());
 		prCurve.add(baseline);
 		return prCurve;
+	}
+
+	private static double getThreshold(double x) {
+		Warnings.check(x >= 0);
+		Warnings.check(x <= 200);
+		double start = 50.0;
+		double y = getA(start) * x * x + getB(start) * x + getC(start);
+		return y / 100.0;
+	}
+
+	private static double getA(double s){
+		return -0.0025 + 0.000025 * s ;
+	}
+	private static double getB(double s) {
+		return 1.0 - 0.01 * s;
+	}
+
+	private static double getC(double s) {
+		return s;
 	}
 
 	/**
@@ -225,6 +253,12 @@ public class ForceMultiplier {
 			if(score > bestScore) bestScore = score;
 		}
 		return bestScore;
+	}
+	
+	public static void main(String[] args) {
+		for(int i = 0; i < 200; i++) {
+			System.out.println(getThreshold(i));
+		}
 	}
 
 }

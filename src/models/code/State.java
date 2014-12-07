@@ -8,6 +8,8 @@ import models.language.Language;
 
 import org.ejml.simple.SimpleMatrix;
 
+import util.MatrixUtil;
+
 public class State {
 	
 	private Map<String, String> choiceMap;
@@ -48,6 +50,14 @@ public class State {
 		int rows = m.getNumElements();
 		SimpleMatrix mPrime = new SimpleMatrix(m);
 		mPrime.reshape(rows, 1);
+		
+		SimpleMatrix withDim = new SimpleMatrix(rows + 2, 1);
+		withDim.set(0, m.numRows());
+		withDim.set(1, m.numCols());
+		for(int i = 0; i < rows; i++) {
+			withDim.set(i + 2, mPrime.get(i));
+		}
+		
 		return mPrime;
 	}
 	
@@ -65,9 +75,18 @@ public class State {
 			}
 		}
 		for(String key : matrixMap.keySet()) {
-			throw new RuntimeException("todo");
+			SimpleMatrix a = matrixMap.get(key);
+			SimpleMatrix b = other.matrixMap.get(key);
+			return MatrixUtil.equals(a, b);
 		}
 		return true;
+	}
+	
+	public int hashCode() {
+		List<Object> objs = new LinkedList<Object>();
+		objs.add(choiceMap);
+		objs.add(numMap);
+		return objs.hashCode();
 	}
 	
 	@Override
@@ -78,6 +97,8 @@ public class State {
 		}
 		return str;
 	}
+	
+	
 
 	public SimpleMatrix getActivation(ModelFormat format, String key) {
 		if(matrixMap.containsKey(key)) {

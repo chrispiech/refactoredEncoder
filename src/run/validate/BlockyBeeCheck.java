@@ -18,12 +18,11 @@ public class BlockyBeeCheck {
 
 	private void run() {
 		System.out.println("hello world");
-		EncoderParams.setLanguage("blocky");
 		EncoderParams.setStateVectorSize(9);
 		FileSystem.setAssnId("Hoc18");
 		FileSystem.setExpId("prePostExp");
 		format = new ModelFormat(LANGUAGE, MODEL_TYPE);
-		trainSet = PrePostExperimentLoader.loadTests("train", 200, format.getLanguage());
+		trainSet = PrePostExperimentLoader.loadTriplets("train", 200, format.getLanguage());
 		
 		validate(trainSet);
 	}

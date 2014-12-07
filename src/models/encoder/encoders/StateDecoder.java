@@ -4,10 +4,12 @@ import java.util.*;
 
 import org.ejml.simple.SimpleMatrix;
 
+import util.MatrixUtil;
 import util.Warnings;
 import minions.encoder.factory.EncoderFactory;
 import models.code.State;
 import models.encoder.CodeVector;
+import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
 import models.encoder.decoders.ValueDecoder;
 
@@ -46,7 +48,8 @@ public class StateDecoder {
 				int number = encoder.decodeNumber(sv);
 				numMap.put(key, number);
 			} else {
-				throw new RuntimeException("not done");
+				SimpleMatrix m = encoder.decodeMatrix(sv);
+				matrixMap.put(key, m);
 			}
 		}
 		return new State(choiceMap, numMap, matrixMap);
@@ -88,6 +91,16 @@ public class StateDecoder {
 			logLoss += outDecoder.logLoss(state, stateVector);
 		}
 		return logLoss;
+	}
+
+	public double getWeightLoss() {
+		double loss = 0;
+		for(String key : decoderMap.keySet()) {
+			ValueDecoder decoder = decoderMap.get(key);
+			SimpleMatrix W = decoder.getW();
+			loss += (EncoderParams.getWeightDecay() / 2.0) * MatrixUtil.norm(W);
+		}
+		return loss;
 	}
 	
 	

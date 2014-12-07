@@ -12,7 +12,7 @@ import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
 import models.encoder.encoders.Encoder;
 import models.language.KarelLanguage;
-import run.train.NewspaperTrain;
+import run.train.NewspaperBearTrain;
 import util.FileSystem;
 import util.Warnings;
 
@@ -20,7 +20,6 @@ public class NewspaperGrad {
 	private void run() {
 		Warnings.msg("backprop is not working for matricies. It is working for the rest");
 		System.out.println("hello world");
-		EncoderParams.setLanguage("karel");
 		EncoderParams.setCodeVectorSize(2);
 		FileSystem.setAssnId("Newspaper");
 		FileSystem.setExpId("postExp");

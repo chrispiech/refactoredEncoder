@@ -6,6 +6,7 @@ import java.util.List;
 import org.ejml.simple.SimpleMatrix;
 
 import util.NeuralUtils;
+import util.StrUtil;
 import models.code.TestTriplet;
 import models.encoder.CodeVector;
 import models.encoder.EncoderParams;
@@ -25,8 +26,6 @@ public class ProgramBackprop {
 			SimpleMatrix parentError, 
 			SimpleMatrix parentW,
 			int depth) {
-		int maxDepth = EncoderParams.getDepthLimit();
-		if(maxDepth > 0 && depth > maxDepth) return;
 		if(!tree.isLeaf()) {
 			nodeError(tree, parentError, parentW);
 			childError(pe, tree, depth);
@@ -65,8 +64,6 @@ public class ProgramBackprop {
 			SimpleMatrix parentError,
 			SimpleMatrix parentW,
 			int depth) {
-		int maxDepth = EncoderParams.getDepthLimit();
-		if(maxDepth > 0 && depth > maxDepth) return;
 		
 		gradientStepNode(model, grad, tree, parentError, parentW);
 		gradStepChildren(model, grad, tree, depth);
@@ -136,7 +133,9 @@ public class ProgramBackprop {
 			for(int i = 0; i < gradEncoder.getArity(); i++) {
 				SimpleMatrix dW = gradEncoder.getW(i);
 				SimpleMatrix W = modelEncoder.getW(i);
-				dW = dW.plus(W.scale(EncoderParams.getWeightDecay()));
+				double lambda = EncoderParams.getWeightDecay();
+				SimpleMatrix dR = W.scale(lambda);
+				dW = dW.plus(dR);
 				gradEncoder.setW(i, dW);
 			}
 		}
@@ -152,6 +151,7 @@ public class ProgramBackprop {
 	public static void updateGradLeaf(
 			ProgramEncoder grad, 
 			SimpleMatrix dF, String type) {
+		if(StrUtil.isNumeric(type)) return;
 		CodeVector leaf = grad.getLeafVector(type);
 		SimpleMatrix newV = leaf.getVector().plus(dF);
 		leaf.set(newV);

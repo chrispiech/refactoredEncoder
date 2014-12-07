@@ -32,16 +32,14 @@ public class BlockyPygmyTrain {
 
 	private void run() {
 		System.out.println("hello world");
-		EncoderParams.setLanguage("blocky");
 		EncoderParams.setCodeVectorSize(100);
 		EncoderParams.setStateVectorSize(EncoderParams.getSqrtN());
 		// first, try to overfit
 		EncoderParams.setWeightDecay(0.0001);
-		EncoderParams.setDepthLimit(3);
 		FileSystem.setAssnId("Hoc18");
 		FileSystem.setExpId("prePostExp");
 		format = new ModelFormat(LANGUAGE, MODEL_TYPE);
-		trainSet = PrePostExperimentLoader.loadTests("train", -1, format.getLanguage());
+		trainSet = PrePostExperimentLoader.loadTriplets("train", -1, format.getLanguage());
 		System.out.println("train set size: " + trainSet.size());
 		train();
 	}

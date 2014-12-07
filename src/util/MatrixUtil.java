@@ -3,6 +3,7 @@ package util;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.ejml.data.DenseMatrix64F;
 import org.ejml.simple.SimpleMatrix;
 
 public class MatrixUtil {
@@ -208,12 +209,31 @@ public class MatrixUtil {
 		return x;
 	}
 	
+	public static double[] asVector(SimpleMatrix v) {
+		Warnings.check(v.isVector());
+		double[] x = new double[v.getNumElements()];
+		for(int i = 0; i < v.getNumElements(); i++) {
+			x[i] = v.get(i);
+		}
+		return x;
+		//return v.getMatrix().getData();
+	}
+	
+	public static SimpleMatrix asSimpleMatrix(double[] p) {
+		SimpleMatrix m =  new SimpleMatrix(p.length, 1);
+		for(int i = 0; i < p.length; i++) {
+			m.set(i, p[i]);
+		}
+		return m;
+	}
+	
 	public static List<Double> matrixToList(SimpleMatrix m) {
 		List<Double> list = new LinkedList<Double>();
 		for(int i = 0; i < m.getNumElements(); i++) {
 			list.add(m.get(i));
 		}
 		return list;
+		//return m.getMatrix().getData();
 	}
 	
 	public static SimpleMatrix listToMatrix(List<Double> list, int rows, int cols) {
@@ -222,25 +242,28 @@ public class MatrixUtil {
 			m.set(i, list.get(i));
 		}
 		return m;
-	}
-	
-	public static void main(String[] args) {
-		System.out.println("softmax test");
-		SimpleMatrix m = new SimpleMatrix(1, 5);
-		m.set(0, 0.011);
-		m.set(1, -0.003);
-		m.set(2, 0.017);
-		m.set(3, 0.009);
-		m.set(4, 0.012);
-		System.out.println("m: \n" + m);
-		System.out.println("softmax(m): \n" + softmax(m));
-		System.out.println("real sm(m): \n" + NeuralUtils.softmax(m));
+		/*DenseMatrix64F m = new DenseMatrix64F(rows, cols);
+		m.setData(list);
+		return new SimpleMatrix(m);*/
 	}
 
 	public static SimpleMatrix singleton(int value) {
 		SimpleMatrix m = new SimpleMatrix(1, 1);
 		m.set(0, value);
 		return m;
+	}
+
+	public static double norm(SimpleMatrix m) {
+		return m.elementMult(m).elementSum();
+	}
+	
+	public static void main(String[] args) {
+		/*double[] m = new double[100];
+		for(int i = 0; i < 100; i++) {
+			m[i] = i;
+		}
+		SimpleMatrix x = listToMatrix(m, 10, 10);
+		System.out.println(x);*/
 	}
 
 }

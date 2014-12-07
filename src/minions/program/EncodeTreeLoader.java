@@ -9,6 +9,8 @@ import models.encoder.neurons.TreeNeuron;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import util.Warnings;
+
 public class EncodeTreeLoader {
 
 	
@@ -18,7 +20,13 @@ public class EncodeTreeLoader {
 		}
 		
 		String type = json.getString("type");
-		String nodeId = json.getString("id");
+		String nodeId = null;
+		if(json.has("id")) {
+			nodeId = json.getString("id");
+		} else if(json.has("nodeId")) {
+			nodeId = json.getString("nodeId");
+		}
+		Warnings.check(nodeId != null);
 
 		List<TreeNeuron> children = new ArrayList<TreeNeuron>();
 		if(json.has("children")) {

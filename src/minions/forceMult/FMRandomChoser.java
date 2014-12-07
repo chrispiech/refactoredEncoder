@@ -9,14 +9,18 @@ public class FMRandomChoser implements FMChoser {
 	private List<String> options;
 	private int budget;
 
-	public FMRandomChoser(Set<String> options) {
-		choiceRandom = new Random(12345);
+	public FMRandomChoser(Set<String> options, int seed) {
+		choiceRandom = new Random(seed);
 		this.options = new ArrayList<String>();
 		this.options.addAll(options);
 	}
 
 	@Override
 	public String choseNext(FMEncoder encoder) {
+		return choseNext();
+	}
+	
+	public String choseNext() {
 		if(chosen == null) {
 			chose();
 		}

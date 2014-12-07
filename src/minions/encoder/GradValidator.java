@@ -14,7 +14,7 @@ public class GradValidator {
 	private static final double OK_DIFF = 1E-4;
 
 	public static boolean validate(Encoder model, List<TestTriplet> list) {
-		boolean valid = true;
+		/*boolean valid = true;
 		for(TestTriplet t : list) {
 			if(!validate(model, t)) {
 				valid = false;
@@ -24,21 +24,22 @@ public class GradValidator {
 				System.out.println("passed test");
 			}
 		}
-		return valid;
+		return valid;*/
+		return new GradValidator().run(model, list);
 	}
 
 	public static boolean validate(Encoder model, TestTriplet t) {
-		return new GradValidator().run(model, t);
+		throw new RuntimeException("depricated");
+		//return new GradValidator().run(model, t);
 	}
 
 	private Encoder model;
-	private TestTriplet test;
+	private List<TestTriplet> tests;
 
-	private boolean run(Encoder model, TestTriplet test) {
-		this.test = test;
+	private boolean run(Encoder model, List<TestTriplet> tests) {
+		this.tests = tests;
 		this.model = model;
-		List<TestTriplet> data = Collections.singletonList(test);
-		Encoder grad = EncoderBackprop.derivative(model, data);
+		Encoder grad = EncoderBackprop.derivative(model, tests);
 		double[] gradVec = ModelVector.modelToVec(grad);
 
 		boolean passed = true;
@@ -48,7 +49,7 @@ public class GradValidator {
 			double truth = finiteDifferenceGrad(jPlus, jMinus);
 			//System.out.println(truth);
 			double calculated = gradVec[i];
-			if(!testDiff(test, truth, calculated, i)) {
+			if(!testDiff(truth, calculated, i)) {
 				passed = false;
 			}
 		}
@@ -68,19 +69,19 @@ public class GradValidator {
 		double[] x = ModelVector.modelToVec(model);
 		x[index] += mod;
 		Encoder prime = ModelVector.vecToModel(model.getFormat(), x);
-		return ModelValueAt.valueAt(prime, test);
+		return ModelValueAt.valueAt(prime, tests);
 	}
 
 	private double finiteDifferenceGrad(double jPlus, double jMinus) {
 		return (jPlus - jMinus) / (2 * EPSILON);
 	}
 
-	private boolean testDiff(TestTriplet test, double truth, double calculated, int elem) {
+	private boolean testDiff(double truth, double calculated, int elem) {
 		double diff = Math.abs(truth - calculated);
 		if(diff > OK_DIFF) {
 			System.out.println("-------");
 			System.out.println("DERIVATIVE WARNING!");
-			System.out.println("astId:  " + test.getId());
+			//System.out.println("astId:  " + test.getId());
 			System.out.println("matrix: " + ModelVector.getMatrixForIndex(model.getFormat(), elem));
 			System.out.println("elem:   " + elem);
 			System.out.println("calc:   " + calculated);
@@ -89,8 +90,8 @@ public class GradValidator {
 			if(truth != 0) {
 				System.out.println("diffM: " + calculated / truth);
 			}
-			EncodeGraph g = test.getEncodeGraph();
-			System.out.println(g.getRunEncodeTreeClone());
+			//EncodeGraph g = test.getEncodeGraph();
+			//System.out.println(g.getRunEncodeTreeClone());
 			System.out.println("-------");
 			return false;
 			//throw new RuntimeException("is this derivative correct? ");

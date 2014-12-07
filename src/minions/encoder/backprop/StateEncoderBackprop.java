@@ -42,11 +42,7 @@ public class StateEncoderBackprop {
 
 	public static void addWeightDecay(StateEncoder encoder,
 			StateEncoder encoderGrad) {
-		SimpleMatrix dB = encoderGrad.getB();
-		SimpleMatrix b = encoder.getB();
 		double lambda = EncoderParams.getWeightDecay();
-		dB = dB.plus(b.scale(lambda));
-		encoderGrad.setB(dB);
 		
 		for(String key : encoder.getStateKeys()) {
 			SimpleMatrix dW = encoderGrad.getW(key);
