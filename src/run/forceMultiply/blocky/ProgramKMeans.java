@@ -12,7 +12,7 @@ import minions.parser.EncodeGraphParser;
 import minions.program.PostExperimentLoader;
 import models.ast.Tree;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncodeGraph;
 import models.encoder.EncoderParams;
 import models.encoder.encoders.Encoder;
@@ -65,7 +65,7 @@ public class ProgramKMeans {
 		for(String id : programMap.keySet()) {
 			TestTriplet test = programMap.get(id);
 			try{
-				CodeVector cv = model.getCodeVector(test);
+				ClusterableMatrix cv = model.getCodeEmbedding(test);
 				encodingMap.put(id, cv.getVector());
 			} catch(RuntimeException e) {
 				System.out.println("ERROR PARSING: " + id);
@@ -80,7 +80,7 @@ public class ProgramKMeans {
 		List<TestTriplet> tests = PostExperimentLoader.load(NUM_PROGRAMS, lang);
 		Map<String, TestTriplet> programMap = new TreeMap<String, TestTriplet>();
 		for(TestTriplet t : tests) {
-			programMap.put(t.getId(), t);
+			programMap.put(t.getAstId(), t);
 		}
 		return programMap;
 	}

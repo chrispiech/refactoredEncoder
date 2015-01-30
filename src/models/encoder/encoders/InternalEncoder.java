@@ -3,7 +3,7 @@ package models.encoder.encoders;
 import java.util.ArrayList;
 import java.util.List;
 
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncoderParams;
 import models.encoder.NeuronLayer;
 
@@ -45,9 +45,9 @@ public class InternalEncoder implements NeuronLayer {
 		this.b = b;
 	}
 
-	public CodeVector getActivation(SimpleMatrix z) {
+	public ClusterableMatrix getActivation(SimpleMatrix z) {
 		SimpleMatrix a = NeuralUtils.elementwiseApplyTanh(z);
-		return new CodeVector(a);
+		return new ClusterableMatrix(a);
 	}
 
 
@@ -59,7 +59,7 @@ public class InternalEncoder implements NeuronLayer {
 		return b;
 	}
 	
-	public SimpleMatrix getZ(List<CodeVector> childAList) {
+	public SimpleMatrix getZ(List<ClusterableMatrix> childAList) {
 		SimpleMatrix z = new SimpleMatrix(b);
 		for(int i = 0; i < getArity(); i++) {
 			SimpleMatrix childA = childAList.get(i).getVector();

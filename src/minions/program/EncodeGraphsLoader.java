@@ -17,10 +17,42 @@ import models.language.Language;
 import org.json.JSONObject;
 
 import util.FileSystem;
+import util.Warnings;
 
 public class EncodeGraphsLoader {
 	
-	public static Map<String, TreeNeuron> loadGraphs(Language lang,
+	public static Map<String, EncodeGraph> loadGraphs(Language lang,
+			ZipFile zip) {
+		Enumeration<? extends ZipEntry> entries = zip.entries();
+		Map<String, EncodeGraph> m = new HashMap<String, EncodeGraph>();
+		int done = 0;
+		while(entries.hasMoreElements()){
+			//System.out.println(++done);
+			ZipEntry entry = entries.nextElement();
+			if(!FileSystem.getExtension(entry.getName()).equals("json")) {
+				continue;
+			}
+			
+			EncodeGraph g = loadGraph(lang, zip, entry);
+			File temp = new File(entry.getName());
+			
+			String name = FileSystem.getNameWithoutExtension(temp.getName());
+			
+			//System.out.println(name);
+			
+			if(g == null || g.hasCycles()) {
+				continue;
+			}
+
+			m.put(name, g);
+			if(++done % 100 == 0) System.out.println(done);
+			//Warnings.msg("don't forget you are only loading 500 programs");
+			//if(done > 500) break;
+		}
+		return m;
+	}
+	
+	public static Map<String, TreeNeuron> loadRunTreeClones(Language lang,
 			ZipFile zip) {
 		Enumeration<? extends ZipEntry> entries = zip.entries();
 		Map<String, TreeNeuron> m = new HashMap<String, TreeNeuron>();
@@ -28,6 +60,9 @@ public class EncodeGraphsLoader {
 		while(entries.hasMoreElements()){
 			//System.out.println(++done);
 			ZipEntry entry = entries.nextElement();
+			if(!FileSystem.getExtension(entry.getName()).equals("json")) {
+				continue;
+			}
 			
 			EncodeGraph g = loadGraph(lang, zip, entry);
 			File temp = new File(entry.getName());
@@ -48,7 +83,7 @@ public class EncodeGraphsLoader {
 
 	public static EncodeGraph loadGraph(Language lang, ZipFile zip,
 			ZipEntry entry) {
-		String str = getFileString(zip, entry);
+		String str = FileSystem.getZipEntryString(zip, entry);
 
 
 		JSONObject fileJson = new JSONObject(str);
@@ -57,17 +92,7 @@ public class EncodeGraphsLoader {
 		return g;
 	}
 
-	private static String getFileString(ZipFile zip, ZipEntry entry){
-		InputStream stream = null;
-		try {
-			stream = zip.getInputStream(entry);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		Scanner sc = new Scanner(stream).useDelimiter("\\A");
-		String str = sc.next();
-		return str;
-	}
+	
 	
 	private static EncodeGraph getEncodeGraph(JSONObject fileJson, Language lang) {
 		Map<String, TreeNeuron> methodMap = new HashMap<String, TreeNeuron>();

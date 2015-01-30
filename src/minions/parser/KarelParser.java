@@ -71,7 +71,7 @@ public class KarelParser extends EncodeTreeParser {
 
 		int recursionCount = 0;
 		for(TestTriplet test : train) {
-			int id = Integer.parseInt(test.getId());
+			int id = Integer.parseInt(test.getAstId());
 			//System.out.println(id);
 			//if(id != 390) continue;
 			//System.out.println(ast);

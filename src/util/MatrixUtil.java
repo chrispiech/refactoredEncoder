@@ -237,6 +237,7 @@ public class MatrixUtil {
 	}
 	
 	public static SimpleMatrix listToMatrix(List<Double> list, int rows, int cols) {
+		Warnings.check(rows * cols == list.size());
 		SimpleMatrix m = new SimpleMatrix(rows, cols);
 		for(int i = 0; i < list.size(); i++) {
 			m.set(i, list.get(i));

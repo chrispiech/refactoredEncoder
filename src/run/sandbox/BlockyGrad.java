@@ -21,7 +21,6 @@ public class BlockyGrad {
 		EncoderParams.setCodeVectorSize(2);
 		FileSystem.setAssnId("Hoc18");
 		FileSystem.setExpId("postExp");
-		EncoderParams.setWorldDim(5, 7);
 		List<TestTriplet> trainSet = PostExperimentLoader.load(200, new BlockyLanguage());
 		ModelFormat format = new ModelFormat("blocky", "bear");
 		

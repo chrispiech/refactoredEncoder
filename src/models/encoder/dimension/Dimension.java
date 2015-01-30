@@ -9,6 +9,10 @@ import models.language.Language;
 public class Dimension {
 
 	protected Language language;
+	
+	public Dimension() {
+		
+	}
 
 	public Dimension(Language language) {
 		this.language = language;
@@ -17,10 +21,6 @@ public class Dimension {
 	public int getDimension() { 
 		throw new RuntimeException("abstract"); 
 	} 
-
-	public int getStateVectorSize() { 
-		throw new RuntimeException("abstract"); 
-	}
 
 	public int getStateEncoderDimension() {
 		throw new RuntimeException("abstract");
@@ -39,28 +39,14 @@ public class Dimension {
 		return numLeaves * EncoderParams.getCodeVectorSize();
 	}
 
-	public int getInternalDimension() { 
-		int dim = 0;
-		for(String type : language.getInternalEncoderTypes()) {
-			dim += getInternalEncoderDimension(type);
-		}
-		return dim;
-	}
-
-	public int getInternalEncoderDimension(String type) {
-		int arity = language.getArity(type);
-		int n = EncoderParams.getCodeVectorSize();
-		return arity * n * n + n;
-	}
-
 	public int getStateEncoderDimension(String key) {
 		int rows = getTypeVectorSize(key);
-		return rows * getStateVectorSize();
+		return rows * EncoderParams.getM();
 	}
 
 	public int getStateDecoderDimension(String key) {
 		int rows = getTypeVectorSize(key);
-		return rows * getStateVectorSize() + rows;
+		return rows * EncoderParams.getM() + rows;
 	}
 
 	public int getTypeVectorSize(String key) {
@@ -78,7 +64,17 @@ public class Dimension {
 
 	public Pair<Integer, Integer> getMatrixDim(String key) {
 		Warnings.check(key.equals("beepers"));
-		return new Pair<Integer, Integer>(7,7);
+		return new Pair<Integer, Integer>(EncoderParams.worldRows,EncoderParams.worldCols);
+	}
+
+	
+
+	public int getInternalDimension() {
+		throw new RuntimeException("abstract");
+	}
+
+	public int getInternalEncoderDimension(String type) {
+		throw new RuntimeException("abstract");
 	}
 
 }

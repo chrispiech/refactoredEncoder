@@ -4,10 +4,12 @@ import java.util.List;
 
 import models.code.State;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
-import models.encoder.EncodeGraph;
 import models.encoder.ModelFormat;
 import models.encoder.decoders.ValueDecoder;
+import models.encoder.encoders.programEncoder.ProgramEncoder;
+import models.encoder.encoders.state.StateDecoderI;
+
+import org.ejml.simple.SimpleMatrix;
 
 public interface Encoder {
 	
@@ -17,12 +19,15 @@ public interface Encoder {
 
 	public ProgramEncoder getProgramEncoder();
 	
-	public StateDecoder getStateDecoder();
-	
-	public ValueDecoder getOutputDecoder(String key);
+	public StateDecoderI getStateDecoder();
 
 	public ModelFormat getFormat();
 
-	public CodeVector getCodeVector(TestTriplet test);
+	public SimpleMatrix getCodeEmbedding(TestTriplet test);
+
+	public ValueDecoder getOutputDecoder(String key);
+
+
+	
 
 }

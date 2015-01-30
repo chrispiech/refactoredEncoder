@@ -12,7 +12,7 @@ import minions.parser.EncodeGraphParser;
 import minions.program.PostExperimentLoader;
 import models.ast.Tree;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncodeGraph;
 import models.encoder.EncoderParams;
 import models.encoder.encoders.Encoder;
@@ -23,6 +23,7 @@ import org.ejml.simple.SimpleMatrix;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import run.forceMultiply.ForceMultUtil;
 import util.FileSystem;
 import util.RandomUtil;
 
@@ -35,7 +36,6 @@ public class ProgramRandom {
 	private void run() {
 
 		FileSystem.setAssnId("Newspaper");
-		EncoderParams.setWorldDim(5, 7);
 
 		// but the feedback lives in the feedbackExp :)
 		System.out.println("loading feedback...");
@@ -44,12 +44,14 @@ public class ProgramRandom {
 
 		// the programs came from the start experiment!
 		System.out.println("loading model...");
+		EncoderParams.stateHasSize = false;
+		EncoderParams.worldRows = 5;
+		
 		FileSystem.setExpId("prePostExp");
-		Encoder model = EncoderSaver.load("simpleMonkey64");
-
-		FileSystem.setExpId("postExp");
-		Map<String, TestTriplet> programMap = loadPrograms(model);
-		TreeMap<String, SimpleMatrix> encodingMap = makeEncodingMap(programMap, model);
+		Encoder model = EncoderSaver.load("simpleMonkey100");
+	
+		Map<String, TreeNeuron> programMap = ForceMultUtil.loadProgramsZip();
+		TreeMap<String, SimpleMatrix> encodingMap = ForceMultUtil.makeEncodingMap(programMap, model);
 
 
 		Set<String> toGrade = encodingMap.keySet();
@@ -61,33 +63,7 @@ public class ProgramRandom {
 		force.run(BUDGET);
 	}
 
-	private TreeMap<String, SimpleMatrix> makeEncodingMap(
-			Map<String, TestTriplet> programMap, Encoder model) {
-		TreeMap<String, SimpleMatrix> encodingMap = new TreeMap<String, SimpleMatrix>();
-		for(String id : programMap.keySet()) {
-			TestTriplet test = programMap.get(id);
-			try{
-				CodeVector cv = model.getCodeVector(test);
-				encodingMap.put(id, cv.getVector());
-			} catch(RuntimeException e) {
-				System.out.println("ERROR PARSING: " + id);
-			}
-
-		}
-		return encodingMap;
-	}
-
-	private Map<String, TestTriplet> loadPrograms(Encoder model) {
-		Language lang = model.getFormat().getLanguage();
-		List<TestTriplet> tests =PostExperimentLoader.load(NUM_PROGRAMS, lang);
-		Map<String, TestTriplet> programMap = new TreeMap<String, TestTriplet>();
-		for(TestTriplet t : tests) {
-			if(!t.getEncodeGraph().hasCycles()) {
-				programMap.put(t.getId(), t);
-			}
-		}
-		return programMap;
-	}
+	
 
 	private Map<String, List<Integer>> loadFeedback() {
 		File expDir = FileSystem.getExpDir();

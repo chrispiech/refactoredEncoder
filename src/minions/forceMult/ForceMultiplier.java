@@ -20,6 +20,8 @@ public class ForceMultiplier {
 	private Map<String, List<Boolean>> gradedMap;
 	private Collection<String> toGrade;
 	private int numFeedbacks;
+	private String result;
+	private double numProp = 0;
 
 	public ForceMultiplier(
 			FMMinion minion, 
@@ -45,7 +47,8 @@ public class ForceMultiplier {
 	 * Force multiply teacher grading, given a budget. Report how well
 	 * you do.
 	 */
-	public double run(int budget) {
+	public String run(int budget) {
+		result = "";
 		minion.setBudget(budget);
 
 		// populate datasets...
@@ -53,23 +56,31 @@ public class ForceMultiplier {
 
 		// fit logistic regression model for each output...
 		fitClassifiers();
+		
+		// check train error
+		checkTrainError();
 
 		// lets try to make a PRCurve...
-		List<Pair<Double, Double>> incorrectCorrect = makeICCurve();
+		List<Pair<Double, Double>> incorrectCorrect = makePRcurve();
 
 		// lets get a best score
 		//double bestScore = getScore(incorrectCorrect);
-		double numProp = reportResults(incorrectCorrect);
+		thresholdSummary(incorrectCorrect);
+		
+		return result;
+	}
 
+	public double getNumProp() {
 		return numProp;
 	}
 
-	private double reportResults(List<Pair<Double, Double>> incorrectCorrect) {
-		double numProp = argMaxScore(incorrectCorrect);
+	private void thresholdSummary(List<Pair<Double, Double>> incorrectCorrect) {
+		numProp = argMaxScore(incorrectCorrect);
 		//System.out.println("best score: " + bestScore);
 		int thresold = (int) (ACC_THRESHOLD * 100);
-		System.out.println("num propagated at " + thresold + "% " + numProp);
-		return numProp;
+		String summary = "num propagated at " + thresold + "% " + numProp;
+		System.out.println(summary);
+		result += summary + "\n";
 	}
 
 	private double argMaxScore(List<Pair<Double, Double>> icList) {
@@ -77,9 +88,9 @@ public class ForceMultiplier {
 		for(Pair<Double, Double> incorrectCorrect : icList) {
 			double incorrect = incorrectCorrect.first();
 			double correct = incorrectCorrect.second();
-			double accuracy = correct / (correct + incorrect);
-			double score = correct + incorrect;
-			if(accuracy > ACC_THRESHOLD && score > bestScore) {
+			double precision = correct / (correct + incorrect);
+			double score = correct;
+			if(precision > ACC_THRESHOLD && score > bestScore) {
 				bestScore = score;
 			}
 		}
@@ -96,8 +107,13 @@ public class ForceMultiplier {
 	private void getFeedback(int budget) {
 		for(int i = 0; i < budget; i++) {
 			String chosenId = minion.choseNext(toGrade);
-			System.out.println("chosen: " + chosenId);
+			
 			List<Boolean> feedback = grade(chosenId);
+			String feedbackStr = "";
+			for(Integer x : feedbackMap.get(chosenId)) {
+				feedbackStr += x + ", ";
+			}
+			System.out.println("chosen: " + chosenId + "\t" + feedbackStr);
 			gradedMap.put(chosenId, feedback);
 			minion.updateActiveLearning(chosenId, feedback);
 		}
@@ -110,6 +126,7 @@ public class ForceMultiplier {
 	 */
 	private List<Boolean> grade(String chosenId) {
 		List<Integer> feedback = feedbackMap.get(chosenId);
+		if(feedback == null) return null;
 		List<Boolean> labels = new ArrayList<Boolean>();
 		for(int j = 0; j < numFeedbacks; j++) {
 			boolean applies = feedback.contains(j);
@@ -127,6 +144,30 @@ public class ForceMultiplier {
 	private void fitClassifiers() {
 		minion.train(gradedMap);
 	}
+	
+	private void checkTrainError() {
+		int correctFeedback = 0;
+		int incorrectFeedback = 0;
+
+		for(String id : gradedMap.keySet()) {
+			List<Boolean> labels = grade(id);
+			if(labels == null) continue;
+			List<Boolean> prediction = predict(id, 0.8);
+			for(int i = 0; i < labels.size(); i++) {
+				boolean trueLabel = labels.get(i);
+				boolean predicted = prediction.get(i);
+				if(predicted && trueLabel) correctFeedback++;
+				if(predicted && !trueLabel) incorrectFeedback++;
+			}
+		}
+
+		Double inc = ((double)incorrectFeedback);
+		Double cor = ((double)correctFeedback);
+		
+		double acc = cor / (inc + cor);
+		String point = inc + "\t" + cor + "\t" + acc;
+		System.out.println("training error: \n" +point);
+	}
 
 	/**
 	 * Method: Make Correct Incorrect Curve
@@ -135,7 +176,7 @@ public class ForceMultiplier {
 	 * curve. For a threshold parameter (theta) in the range of 0 to 1, 
 	 * change your classifier to make more predictions.
 	 */
-	private List<Pair<Double, Double>> makeICCurve() {
+	private List<Pair<Double, Double>> makePRcurve() {
 		List<Pair<Double, Double>> prCurve = new ArrayList<Pair<Double, Double>>();
 		System.out.println("precision recall");
 		System.out.println("incorrect, correct");
@@ -147,7 +188,9 @@ public class ForceMultiplier {
 			double inc = ic.first();
 			double cor = ic.second();
 			double acc = cor / (inc + cor);
-			System.out.println(inc + "\t" + cor + "\t" + acc);
+			String point = inc + "\t" + cor + "\t" + acc;
+			System.out.println(point);
+			result += point + "\n";
 		}
 		int bCorrect = getBaselineCorrect();
 		Pair<Double, Double> baseline = new Pair<Double, Double>(0., (double)bCorrect);
@@ -159,7 +202,7 @@ public class ForceMultiplier {
 	private static double getThreshold(double x) {
 		Warnings.check(x >= 0);
 		Warnings.check(x <= 200);
-		double start = 50.0;
+		double start = 80.0;
 		double y = getA(start) * x * x + getB(start) * x + getC(start);
 		return y / 100.0;
 	}
@@ -207,6 +250,7 @@ public class ForceMultiplier {
 
 		for(String id : toGrade) {
 			List<Boolean> labels = grade(id);
+			if(labels == null) continue;
 			List<Boolean> prediction = predict(id, theta);
 			for(int i = 0; i < labels.size(); i++) {
 				boolean trueLabel = labels.get(i);

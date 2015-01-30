@@ -17,8 +17,8 @@ import minions.program.PrePostExperimentLoader;
 import models.code.TestTriplet;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
+import models.encoder.encoders.models.BearModel;
 
 public class BlockyBeeTrain {
 	

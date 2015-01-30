@@ -12,7 +12,7 @@ import minions.parser.EncodeGraphParser;
 import minions.program.PostExperimentLoader;
 import models.ast.Tree;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncodeGraph;
 import models.encoder.EncoderParams;
 import models.encoder.encoders.Encoder;
@@ -23,8 +23,10 @@ import org.ejml.simple.SimpleMatrix;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import run.forceMultiply.ForceMultUtil;
 import util.FileSystem;
 import util.RandomUtil;
+import util.Warnings;
 
 public class ProgramRandomMany {
 
@@ -32,22 +34,22 @@ public class ProgramRandomMany {
 	private static final int BUDGET = 500;
 	private static final int ITERATIONS = 20;
 	
-	private static final String MODEL = "simpleMonkey64";
 
 
-	private void run() {
+	private void run(String modelName) {
 		FileSystem.setAssnId("Newspaper");
-		EncoderParams.setWorldDim(5, 7);
 
 		// but the feedback lives in the feedbackExp :)
 		System.out.println("loading feedback...");
 		FileSystem.setExpId("feedbackExp");
-		Map<String, List<Integer>> feedbackMap = loadFeedback();
+		Map<String, List<Integer>> feedbackMap = ForceMultUtil.loadFeedbackZip();
 
 		// the programs came from the start experiment!
 		System.out.println("loading model...");
+		EncoderParams.stateHasSize = false;
+		EncoderParams.worldRows = 5;
 		FileSystem.setExpId("prePostExp");
-		Encoder model = EncoderSaver.load(MODEL);
+		Encoder model = EncoderSaver.load(modelName);
 
 		FileSystem.setExpId("postExp");
 		Map<String, TestTriplet> programMap = loadPrograms(model);
@@ -55,17 +57,16 @@ public class ProgramRandomMany {
 
 		FileSystem.setExpId("feedbackExp");
 		File resultDir = new File(FileSystem.getExpDir(), "results");
-		String resultFileName = "random-" + MODEL;
-		String resultTxt = "";
+		File resultModelDir = new File(resultDir, "random-" + modelName);
+		
 		System.out.println("running active learning!");
 		for(int i = 0; i < ITERATIONS; i++) {
-			Set<String> toGrade = new HashSet<String>(encodingMap.keySet());
 			FMMinion minion = new FMEncoderRandom(encodingMap, i);
-			ForceMultiplier force = new ForceMultiplier(minion, feedbackMap, toGrade);
-			force.run(BUDGET);
-			double result = force.run(BUDGET);
-			resultTxt += result + "\n";
-			FileSystem.createFile(resultDir, resultFileName, resultTxt);
+			ForceMultiplier force = new ForceMultiplier(minion, feedbackMap, programMap.keySet());
+			String result = force.run(BUDGET);
+			
+			String resultFileName = "random-" + modelName + "-" + i + ".txt";
+			FileSystem.createFile(resultModelDir, resultFileName, result);
 		}
 	}
 
@@ -75,7 +76,7 @@ public class ProgramRandomMany {
 		for(String id : programMap.keySet()) {
 			TestTriplet test = programMap.get(id);
 			try{
-				CodeVector cv = model.getCodeVector(test);
+				ClusterableMatrix cv = model.getCodeEmbedding(test);
 				encodingMap.put(id, cv.getVector());
 			} catch(RuntimeException e) {
 				System.out.println("ERROR PARSING: " + id);
@@ -91,7 +92,7 @@ public class ProgramRandomMany {
 		Map<String, TestTriplet> programMap = new TreeMap<String, TestTriplet>();
 		for(TestTriplet t : tests) {
 			if(!t.getEncodeGraph().hasCycles()) {
-				programMap.put(t.getId(), t);
+				programMap.put(t.getAstId(), t);
 			}
 		}
 		return programMap;
@@ -117,6 +118,7 @@ public class ProgramRandomMany {
 	}
 
 	public static void main(String[] args) {
-		new ProgramRandomMany().run();
+		Warnings.check(args.length == 1, "wrong num args.");
+		new ProgramRandomMany().run(args[0]);
 	}
 }

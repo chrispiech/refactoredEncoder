@@ -11,10 +11,10 @@ import models.code.State;
 import models.code.TestTriplet;
 import models.encoder.ModelFormat;
 import models.encoder.decoders.ValueDecoder;
-import models.encoder.encoders.BearModel;
-import models.encoder.encoders.BeeModel;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.StateEncoder;
+import models.encoder.encoders.models.BearModel;
+import models.encoder.encoders.models.BeeModel;
+import models.encoder.encoders.state.StateEncoder;
 import models.encoder.neurons.StateNeuron;
 import models.encoder.neurons.ValueNeuron;
 
@@ -58,17 +58,19 @@ public class BeeBackprop {
 	}
 
 	private void addGradForTest(TestTriplet test) {
-		addGradForState(test.getPrecondition());
-		addGradForState(test.getPostcondition());
+		//addGradForState(test.getPrecondition());
+		addGradForState(test.getPostcondition(), test.getCount());
 	}
 
-	private void addGradForState(State truth) {
+	private void addGradForState(State truth, int weight) {
 		StateNeuron n3 = new StateNeuron(truth);
 		StateEncoder stateEncoder = model.getStateEncoder();
 		SimpleMatrix preVector = stateEncoder.activateState(n3);
 
 		// backprop for post error
 		for(String key : format.getStateKeys()){
+			if(key.equals("beepers")) continue;
+			Warnings.msg("don't forget to turn beepers back on!");
 			// calculate activation and mu for the value neuron
 			ValueDecoder decoder = model.getOutputDecoder(key);
 			ValueNeuron n2 = decoder.outActivation(preVector, key);
@@ -84,8 +86,8 @@ public class BeeBackprop {
 			
 			// now update the gradients..
 			SimpleMatrix a3 = n3.getActivation();
-			StateDecoderBackprop.gradientStepValue(modelGrad, a3, n2);
-			StateEncoderBackprop.gradientStepIn(modelGrad, n3);
+			StateDecoderBackprop.gradientStepValue(modelGrad, a3, n2, weight);
+			StateEncoderBackprop.gradientStepIn(modelGrad, n3, weight);
 		}
 	}
 

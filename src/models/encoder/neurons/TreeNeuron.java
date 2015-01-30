@@ -1,30 +1,31 @@
 package models.encoder.neurons;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import models.blocky.BlockyHelper;
-import models.encoder.CodeVector;
-
-import org.ejml.simple.SimpleMatrix;
-
+import models.encoder.ClusterableMatrix;
 import util.Warnings;
 
-public class TreeNeuron extends Neuron {
-	
+public class TreeNeuron extends Neuron implements Serializable{
+	private static final long serialVersionUID = -7014726958033335159L;
 	private String type;
-	private List<TreeNeuron> children;
-	private String nodeId;
-	
+	private TreeNeuron[] children;
+	private transient short nodeId;
+
 	public TreeNeuron(String type, String nodeId) {
 		this(type, new ArrayList<TreeNeuron>(), nodeId);
 	}
 
 	public TreeNeuron(String type, List<TreeNeuron> children, String nodeId) {
 		this.type = type;
-		this.children = children;
-		this.nodeId = nodeId;
+		this.children = new TreeNeuron[children.size()];
+		children.toArray(this.children);
+		this.nodeId = Short.parseShort(nodeId);
 		z = null;
 		activation = null;
 	}
@@ -34,15 +35,33 @@ public class TreeNeuron extends Neuron {
 		this.z = null;
 		this.activation = null;
 		this.nodeId = toCopy.nodeId;
-		children = new ArrayList<TreeNeuron>();
-		for(TreeNeuron child : toCopy.children) {
+		int numChildren = toCopy.children.length;
+		children = new TreeNeuron[numChildren];
+		for(int i = 0; i < numChildren; i++) {
+			TreeNeuron child = toCopy.children[i];
 			TreeNeuron newChild = new TreeNeuron(child);
-			children.add(newChild);
+			children[i] = newChild;
 		}
 	}
-	
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setChildren(TreeNeuron[] children) {
+		this.children = children;
+	}
+
+	public void setNodeId(short nodeId) {
+		this.nodeId = nodeId;
+	}
+
+	public String getNodeId() {
+		return nodeId + "";
+	}
+
 	public List<TreeNeuron> getChildren() {
-		return children;
+		return Arrays.asList(children);
 	}
 
 	public String getType() {
@@ -50,30 +69,30 @@ public class TreeNeuron extends Neuron {
 	}
 
 	public int numChildren() {
-		return children.size();
+		return children.length;
 	}
 
 	public TreeNeuron getChild(int i) {
-		return children.get(i);
+		return children[i];
 	}
 
-	
-	
+
+
 	public boolean isLeaf() {
-		return children.size() == 0;
+		return numChildren() == 0;
 	}
-	
+
 	public boolean isConstant() {
 		try { 
-	        Integer.parseInt(type); 
-	    } catch(NumberFormatException e) { 
-	        return false; 
-	    }
-	    // only got here if we didn't return false
-		Warnings.check(children.size() == 0);
-	    return true;
+			Integer.parseInt(type); 
+		} catch(NumberFormatException e) { 
+			return false; 
+		}
+		// only got here if we didn't return false
+		Warnings.check(isLeaf());
+		return true;
 	}
-	
+
 	public String toString() {
 		return toString(0);
 	}
@@ -85,7 +104,7 @@ public class TreeNeuron extends Neuron {
 			indent += "  ";
 		}
 		treeString += indent + type + "\n";
-		if(!children.isEmpty()) {
+		if(!isLeaf()) {
 			treeString += indent + "[\n";
 			for(TreeNeuron child : children) {
 				treeString += child.toString(indentSize + 1);
@@ -108,29 +127,29 @@ public class TreeNeuron extends Neuron {
 		return "block";
 	}
 
-	public List<CodeVector> getChildActivations() {
-		List<CodeVector> acts = new ArrayList<CodeVector>();
+	public List<ClusterableMatrix> getChildActivations() {
+		List<ClusterableMatrix> acts = new ArrayList<ClusterableMatrix>();
 		for(TreeNeuron child : getChildren()) {
-			acts.add(new CodeVector(child.getActivation()));
+			acts.add(new ClusterableMatrix(child.getActivation()));
 		}
 		return acts;
 	}
-	
+
 	public boolean equals(Object o) {
 		TreeNeuron other = (TreeNeuron)o;
 		if(!type.equals(other.type)) return false;
-		return children.equals(other.children);
+		return Arrays.equals(children, other.children);
 	}
-	
+
 	public int hashCode() {
 		List<Object> objs = new LinkedList<Object>();
 		objs.add(type);
-		objs.addAll(children);
+		objs.addAll(getChildren());
 		return objs.hashCode();
 	}
-	
+
 	public TreeNeuron getDescendant(String nodeId) {
-		if(this.nodeId.equals(nodeId)) {
+		if(this.nodeId == Short.parseShort(nodeId)) {
 			return this;
 		}
 		for(TreeNeuron child : children) {
@@ -140,6 +159,13 @@ public class TreeNeuron extends Neuron {
 			}
 		}
 		return null;
+	}
+
+	private void writeObject(
+			ObjectOutputStream aOutputStream
+			) throws IOException {
+		//perform the default serialization for all non-transient, non-static fields
+		aOutputStream.defaultWriteObject();
 	}
 
 }

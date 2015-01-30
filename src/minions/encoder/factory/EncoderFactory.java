@@ -26,7 +26,7 @@ public class EncoderFactory {
 		return ModelVector.vecToModel(format, vec);
 	}
 
-	private static double[] makeRandomVec(ModelFormat format) {
+	public static double[] makeRandomVec(ModelFormat format) {
 		int dim = format.getNumParams();
 		double[] vec = new double[dim];
 		for(int i = 0; i < dim; i++) {

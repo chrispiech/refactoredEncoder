@@ -10,15 +10,15 @@ import util.Warnings;
 import minions.encoder.factory.EncoderFactory;
 import models.code.State;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncodeGraph;
 import models.encoder.ModelFormat;
 import models.encoder.decoders.ValueDecoder;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.MonkeyModel;
-import models.encoder.encoders.ProgramEncoder;
-import models.encoder.encoders.StateEncoder;
+import models.encoder.encoders.models.BearModel;
+import models.encoder.encoders.models.MonkeyModel;
+import models.encoder.encoders.programEncoder.ProgramEncoderVec;
+import models.encoder.encoders.state.StateEncoder;
 import models.encoder.neurons.ValueNeuron;
 import models.encoder.neurons.StateNeuron;
 import models.encoder.neurons.TreeNeuron;
@@ -87,8 +87,8 @@ public class MonkeyBackprop {
 		State truth = test.getPostcondition();
 
 		// calculate the activation of all tree nodes
-		ProgramEncoder programEncoder = model.getProgramEncoder();
-		CodeVector cv = programEncoder.activateTree(runTree);
+		ProgramEncoderVec programEncoder = model.getProgramEncoder();
+		ClusterableMatrix cv = programEncoder.activateTree(runTree);
 
 		// calcuate the activation of the pre state embedding
 		StateNeuron input = new StateNeuron(pre);
@@ -210,8 +210,8 @@ public class MonkeyBackprop {
 
 	protected void addGradProgram(TreeNeuron tree, StateNeuron input,
 			ValueNeuron outNode) {
-		ProgramEncoder programModel = model.getProgramEncoder();
-		ProgramEncoder programGrad = modelGrad.getProgramEncoder();
+		ProgramEncoderVec programModel = model.getProgramEncoder();
+		ProgramEncoderVec programGrad = modelGrad.getProgramEncoder();
 
 		if(tree.isLeaf()) {
 			ValueDecoder parent = model.getOutputDecoder(outNode.getKey());

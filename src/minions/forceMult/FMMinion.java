@@ -16,4 +16,5 @@ public interface FMMinion {
 
 	public void setBudget(int budget);
 
+
 }

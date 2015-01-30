@@ -54,7 +54,7 @@ public class CurriculumPlanner {
 	}
 	
 	private void saveOrder(List<Integer> order, String name) {
-		String str = "";
+		/*String str = "";
 		for (int val : order) {
 			str += val + " ";
 		}
@@ -62,7 +62,8 @@ public class CurriculumPlanner {
 		    out.print(str);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		}
+		}*/
+		throw new RuntimeException("not java 1.6");
 	}
 	
 	private List<Integer> loadOrder(String name) {
@@ -128,7 +129,7 @@ public class CurriculumPlanner {
 		List<Integer> astIdList = new ArrayList<Integer>();
 		int size = trainSet.size();
 		for (int i = 0; i < size; i++) {
-			astIdList.add(Integer.parseInt(trainSet.get(i).getId()));
+			astIdList.add(Integer.parseInt(trainSet.get(i).getAstId()));
 		}
 		
 		//Get index of trainSet according to curriculum order

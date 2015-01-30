@@ -2,7 +2,7 @@ package minions.forceMult;
 
 import java.util.*;
 
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.math.LogRegression;
 
 import org.ejml.simple.SimpleMatrix;
@@ -33,7 +33,7 @@ public class FMBatchFast {
 
 	private Map<String, SimpleMatrix> encodingMap = null;
 
-	public FMBatchFast(Map<String, CodeVector> codeVectorMap, int batchSize) {
+	public FMBatchFast(Map<String, ClusterableMatrix> codeVectorMap, int batchSize) {
 		this.batchSize = batchSize;
 		Warnings.msg("code vectors not normalized.");
 		createNormalizedEncodingMap(codeVectorMap);
@@ -47,7 +47,7 @@ public class FMBatchFast {
 		//throw new RuntimeException("This cache seems to have made things bad...");
 	}
 	
-	private void createNormalizedEncodingMap(Map<String, CodeVector> codeVectorMap) {
+	private void createNormalizedEncodingMap(Map<String, ClusterableMatrix> codeVectorMap) {
 		encodingMap = new HashMap<String, SimpleMatrix>();
 		for(String key : codeVectorMap.keySet()) {
 			SimpleMatrix v = codeVectorMap.get(key).getVector();

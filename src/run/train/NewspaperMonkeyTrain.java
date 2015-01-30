@@ -13,14 +13,14 @@ import minions.encoder.backprop.BearBackprop;
 import minions.encoder.factory.EncoderFactory;
 import minions.encoder.modelVector.ModelVector;
 import minions.minimizer.AdaGrad;
-import minions.minimizer.AdaGrad2;
+import minions.minimizer.lemur.AdaGradThreadedLemur;
 import minions.program.PostExperimentLoader;
 import minions.program.PrePostExperimentLoader;
 import models.code.TestTriplet;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
+import models.encoder.encoders.models.BearModel;
 
 public class NewspaperMonkeyTrain {
 	
@@ -39,7 +39,6 @@ public class NewspaperMonkeyTrain {
 		EncoderParams.setWeightDecay(0.0001);
 		FileSystem.setAssnId("Newspaper");
 		FileSystem.setExpId("prePostExp");
-		EncoderParams.setWorldDim(5, 7);
 		trainSet = PrePostExperimentLoader.loadTriplets("train", -1, format.getLanguage());
 		
 		System.out.println(trainSet.size());
@@ -50,7 +49,7 @@ public class NewspaperMonkeyTrain {
 	public void train() {
 		int epochs = 30;  
 		final long startTime = System.currentTimeMillis();
-		Encoder model = AdaGrad2.train(format, trainSet, epochs, NAME);
+		Encoder model = AdaGradThreadedLemur.train(format, trainSet, epochs, NAME);
 		final long endTime = System.currentTimeMillis();
 		long elapsedTime = endTime - startTime;
 		System.out.println("time to train: " + elapsedTime);

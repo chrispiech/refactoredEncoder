@@ -2,7 +2,7 @@ package minions.forceMult;
 
 import java.util.*;
 
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.math.PCA;
 
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
@@ -25,7 +25,7 @@ public class FMCluster implements FMChoser{
 
 	// actual instance variables
 	private Queue<String> toGrade = new LinkedList<String>();
-	private Map<CodeVector, String> reverseEncoding = null;
+	private Map<ClusterableMatrix, String> reverseEncoding = null;
 
 	public FMCluster(TreeMap<String, SimpleMatrix> encodingMap) {
 		System.out.println("running pca...");
@@ -44,14 +44,14 @@ public class FMCluster implements FMChoser{
 			System.out.println("pca time: " + (endTime -startTime) + "ms");
 		}
 
-		reverseEncoding = new HashMap<CodeVector, String>();
+		reverseEncoding = new HashMap<ClusterableMatrix, String>();
 		for(String id : encodingMap.keySet()) {
 			SimpleMatrix encoding = encodingMap.get(id);
 			if(USE_PCA) {
 				double[] p = pca.sampleToEigenSpace(MatrixUtil.asVector(encoding));
 				encoding = MatrixUtil.asSimpleMatrix(p);
 			}
-			reverseEncoding.put(new CodeVector(encoding), id);
+			reverseEncoding.put(new ClusterableMatrix(encoding), id);
 		}
 
 	}
@@ -78,11 +78,11 @@ public class FMCluster implements FMChoser{
 
 	private void makeBatch() {
 		System.out.println("clustering...");
-		List<CodeVector> points = new ArrayList<CodeVector>();
+		List<ClusterableMatrix> points = new ArrayList<ClusterableMatrix>();
 		points.addAll(reverseEncoding.keySet());
-		List<CentroidCluster<CodeVector>> centroids = cluster(points);
-		for(CentroidCluster<CodeVector> centroid : centroids) {
-			List<CodeVector> cluster = centroid.getPoints();
+		List<CentroidCluster<ClusterableMatrix>> centroids = cluster(points);
+		for(CentroidCluster<ClusterableMatrix> centroid : centroids) {
+			List<ClusterableMatrix> cluster = centroid.getPoints();
 			Clusterable center = centroid.getCenter();
 			String id = getMedioidId(center, cluster);
 			Warnings.check(id != null);
@@ -92,9 +92,9 @@ public class FMCluster implements FMChoser{
 		System.out.println("done clustering.");
 	}
 
-	private List<CentroidCluster<CodeVector>> cluster(List<CodeVector> data) {
+	private List<CentroidCluster<ClusterableMatrix>> cluster(List<ClusterableMatrix> data) {
 
-		List<CodeVector> points = new LinkedList<CodeVector>();
+		List<ClusterableMatrix> points = new LinkedList<ClusterableMatrix>();
 
 		if(SUBSAMPLE < 0) {
 			points.addAll(data);
@@ -105,14 +105,14 @@ public class FMCluster implements FMChoser{
 			}
 		}
 
-		List<CentroidCluster<CodeVector>> best = null;
+		List<CentroidCluster<ClusterableMatrix>> best = null;
 		double minLoss = 0;
 		for(int i = 0; i < RANDOM_RESTARTS; i++) {
 			System.out.println("kmeans restart: " + i);
 			long startTime = System.currentTimeMillis();
-			KMeansPlusPlusClusterer<CodeVector> kMeans = 
-					new KMeansPlusPlusClusterer<CodeVector>(K, 100);
-			List<CentroidCluster<CodeVector>> centroids = kMeans.cluster(points);
+			KMeansPlusPlusClusterer<ClusterableMatrix> kMeans = 
+					new KMeansPlusPlusClusterer<ClusterableMatrix>(K, 100);
+			List<CentroidCluster<ClusterableMatrix>> centroids = kMeans.cluster(points);
 			double loss = clusterLoss(points, centroids);
 			if(best == null || loss < minLoss) {
 				best = centroids;
@@ -127,20 +127,20 @@ public class FMCluster implements FMChoser{
 	}
 
 	private double clusterLoss(
-			List<CodeVector> points,
-			List<CentroidCluster<CodeVector>> centroids) {
+			List<ClusterableMatrix> points,
+			List<CentroidCluster<ClusterableMatrix>> centroids) {
 		double loss = 0;
-		for(CodeVector v : points) {
+		for(ClusterableMatrix v : points) {
 			double dist = getL2Dist(v, centroids);
 			loss += dist;
 		}
 		return loss;
 	}
 
-	private double getL2Dist(CodeVector v,
-			List<CentroidCluster<CodeVector>> centroids) {
+	private double getL2Dist(ClusterableMatrix v,
+			List<CentroidCluster<ClusterableMatrix>> centroids) {
 		Double min = null;
-		for(CentroidCluster<CodeVector> c : centroids) {
+		for(CentroidCluster<ClusterableMatrix> c : centroids) {
 			double d = distSquared(c.getCenter(), v);
 			if(min == null || d < min) {
 				min = d;
@@ -149,10 +149,10 @@ public class FMCluster implements FMChoser{
 		return min;
 	}
 
-	private String getMedioidId(Clusterable center, List<CodeVector> cluster) {
-		CodeVector argMin = null;
+	private String getMedioidId(Clusterable center, List<ClusterableMatrix> cluster) {
+		ClusterableMatrix argMin = null;
 		double min = 0;
-		for(CodeVector v : cluster) {
+		for(ClusterableMatrix v : cluster) {
 			double d = distSquared(center, v);
 			if(argMin == null || d < min) {
 				argMin = v;

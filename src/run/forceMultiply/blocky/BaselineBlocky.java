@@ -13,7 +13,7 @@ import minions.parser.EncodeGraphParser;
 import minions.program.PostExperimentLoader;
 import models.ast.Tree;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncodeGraph;
 import models.encoder.EncoderParams;
 import models.encoder.encoders.Encoder;

@@ -23,8 +23,8 @@ import minions.program.PrePostExperimentLoader;
 import models.code.TestTriplet;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
+import models.encoder.encoders.models.BearModel;
 
 public class AdaGradCluster {
 	private ModelFormat format;
@@ -69,7 +69,7 @@ public class AdaGradCluster {
 		System.out.println("Training!");
 		System.out.println("---------");
 		System.out.println("dim = " + format.getDimension().getDimension());
-		System.out.println(EncoderSaver.makeNotes(train));
+		System.out.println(EncoderSaver.makeNotes());
 
 		setup(train);
 
@@ -95,7 +95,7 @@ public class AdaGradCluster {
 					double weight = eta/Math.sqrt(gradStore[i]);
 					x[i] = (x[i] - weight*gradVec[i]);
 				}
-				miniBatchOutput(epoch, t);
+				//miniBatchOutput(epoch, t);
 			}
 			epochOutput(train, x, epoch);
 			epoch++;
@@ -110,9 +110,9 @@ public class AdaGradCluster {
 		System.out.println("Training!");
 		System.out.println("---------");
 		System.out.println("dim = " + format.getDimension().getDimension());
-		System.out.println(EncoderSaver.makeNotes(train));
+		System.out.println(EncoderSaver.makeNotes());
 
-		setup(train);
+		setup(test);
 
 		numMinibatches = 50;
 		double eta = EncoderParams.getLearningRate();
@@ -157,21 +157,12 @@ public class AdaGradCluster {
 		double algoTimeS = getAlgorithmTimeS();
 		addLogLine(epoch, value, testAccuracy, algoTimeS);
 
-		System.out.println("\nepoch finished:");
-		System.out.println("--------");
-		String info = "";
-		info += "epoch: " + epoch + "\n";
-		info += "value: " + value + "\n";
-		info += "test acc: " + testAccuracy + "\n";
-		info += "train time: " + algoTimeS + "\n";
+		System.out.println(value);
 
-		System.out.println(info);
+		String notes = EncoderSaver.makeNotes();
+		notes += value;
 
-		String notes = EncoderSaver.makeNotes(train);
-		notes += info;
-
-		EncoderSaver.save(x, format, name, name + "-epoch" + epoch, notes);
-		System.out.println("");
+		EncoderSaver.save(x, format, name, "model", notes);
 		
 		saveLog();
 	}
@@ -242,7 +233,7 @@ public class AdaGradCluster {
 	public void setup(List<TestTriplet> train) {
 		log = "log start " + new SimpleDateFormat("dd-MM-yyyy").format(new Date()) + "\n";
 		log += "num params: " + format.getDimension().getDimension() + "\n";
-		log += EncoderSaver.makeNotes(train) + "\n";
+		log += EncoderSaver.makeNotes() + "\n";
 		log += "-------------\n";
 		addLogHeader();
 	}
@@ -253,10 +244,7 @@ public class AdaGradCluster {
 
 	private void addLogLine(int epoch, double value, double testAccuracy, double algoTimeS) {
 		String line = "";
-		line += epoch + ",";
-		line += value + ",";
-		line += testAccuracy + ",";
-		line += algoTimeS +",";
+		line += value;
 		log += line + "\n";
 	}
 	

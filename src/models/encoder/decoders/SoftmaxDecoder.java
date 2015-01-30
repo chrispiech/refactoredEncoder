@@ -6,7 +6,7 @@ import java.util.List;
 
 import models.code.State;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncoderParams;
 import models.encoder.neurons.ValueNeuron;
 import models.language.Language;
@@ -14,6 +14,7 @@ import models.language.Language;
 import org.ejml.simple.SimpleMatrix;
 
 import util.MatrixUtil;
+import util.Warnings;
 
 public class SoftmaxDecoder extends ValueDecoder{
 
@@ -92,6 +93,21 @@ public class SoftmaxDecoder extends ValueDecoder{
 		int truthIndex = SoftmaxDecoder.getTruthIndex(language, state, key);
 		double softmaxK = a.get(truthIndex);
 		return -Math.log(softmaxK);
+	}
+	
+	
+	public double logLoss(int truthIndex, SimpleMatrix input) {
+		SimpleMatrix z = getZ(input);
+		SimpleMatrix a = getActivation(z);
+		double softmaxK = a.get(truthIndex);
+		return -Math.log(softmaxK);
+	}
+
+	public int decodeChoice(SimpleMatrix root, double threshold) {
+		SimpleMatrix softMax = getActivation(getZ(root));
+		Warnings.check(softMax.getNumElements() == 2);
+		return softMax.get(1) > threshold ? 1 : 0;
+		
 	}
 
 }

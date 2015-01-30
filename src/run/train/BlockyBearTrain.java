@@ -12,13 +12,13 @@ import minions.encoder.backprop.BearBackprop;
 import minions.encoder.factory.EncoderFactory;
 import minions.encoder.modelVector.ModelVector;
 import minions.minimizer.AdaGrad;
-import minions.minimizer.AdaGrad2;
+import minions.minimizer.lemur.AdaGradThreadedLemur;
 import minions.program.PostExperimentLoader;
 import models.code.TestTriplet;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
+import models.encoder.encoders.models.BearModel;
 
 public class BlockyBearTrain {
 	
@@ -52,7 +52,7 @@ public class BlockyBearTrain {
 		
 		double[] loss = new double[epochs];
 		final long startTime = System.currentTimeMillis();
-		Encoder model = AdaGrad2.train(format, trainSet, epochs, NAME);
+		Encoder model = AdaGradThreadedLemur.train(format, trainSet, epochs, NAME);
 		//Encoder model = AdaGrad.minimize(format, trainSet, epochs, miniBatchSize, eta, loss, NAME);
 		final long endTime = System.currentTimeMillis();
 		long elapsedTime = endTime - startTime;

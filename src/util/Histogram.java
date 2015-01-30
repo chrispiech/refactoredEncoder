@@ -47,7 +47,7 @@ public class Histogram {
 			String upperStr = String.format("%.2f", upperBound);
 			//String boundStr = "[" + lowerStr + "," + upperStr + ")";
 			String boundStr = lowerStr;
-			System.out.println(boundStr + "\t" + count);
+			str += boundStr + "\t" + count + "\n";
 		}
 		return str;
 	}

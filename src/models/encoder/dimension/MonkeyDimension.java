@@ -34,5 +34,19 @@ public class MonkeyDimension extends Dimension {
 		}
 		return numParams;
 	}
+	
+	public int getInternalDimension() { 
+		int dim = 0;
+		for(String type : language.getInternalEncoderTypes()) {
+			dim += getInternalEncoderDimension(type);
+		}
+		return dim;
+	}
+
+	public int getInternalEncoderDimension(String type) {
+		int arity = language.getArity(type);
+		int n = EncoderParams.getCodeVectorSize();
+		return arity * n * n + n;
+	}
 
 }

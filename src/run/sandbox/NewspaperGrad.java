@@ -23,7 +23,6 @@ public class NewspaperGrad {
 		EncoderParams.setCodeVectorSize(2);
 		FileSystem.setAssnId("Newspaper");
 		FileSystem.setExpId("postExp");
-		EncoderParams.setWorldDim(5, 7);
 		List<TestTriplet> trainSet = PostExperimentLoader.loadFolds("homeWorld", 1, new KarelLanguage());
 		ModelFormat format = new ModelFormat("karel", "bear");
 		

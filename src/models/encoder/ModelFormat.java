@@ -2,21 +2,26 @@ package models.encoder;
 
 import java.util.List;
 
-import org.apache.commons.math3.util.Pair;
-
+import minions.minimizer.teddy.TeddyDimension;
 import models.encoder.dimension.BearDimension;
 import models.encoder.dimension.BeeDimension;
+import models.encoder.dimension.DeepBeeDimension;
 import models.encoder.dimension.Dimension;
+import models.encoder.dimension.LemurDimension;
 import models.encoder.dimension.MonkeyDimension;
 import models.encoder.dimension.PenguinDimension;
+import models.encoder.dimension.TurtleDimension;
 import models.language.BlockyLanguage;
-import models.language.KarelLanguage;
+import models.language.KarelLanguage2;
 import models.language.Language;
+import models.language.ToyLanguage;
+
+import org.apache.commons.math3.util.Pair;
 
 public class ModelFormat {
 
 	private Language languageFormat = null;
-	private Dimension dimension = null;
+	public Dimension dimension = null;
 	private String modelType;
 	private String languageType;
 
@@ -27,7 +32,9 @@ public class ModelFormat {
 		if(language.equals("blocky")) {
 			languageFormat = new BlockyLanguage();
 		} else if(language.equals("karel")) {
-			languageFormat = new KarelLanguage();
+			languageFormat = new KarelLanguage2();
+		} else if(language.equals("toy")){
+			languageFormat = new ToyLanguage();
 		} else {
 			throw new RuntimeException("wot");
 		}
@@ -42,8 +49,15 @@ public class ModelFormat {
 			dimension = new MonkeyDimension(languageFormat);
 		} else if(modelType.equals("penguin")) {
 			dimension = new PenguinDimension(languageFormat);
+		} else if(modelType.equals("lemur")) {
+			dimension = new LemurDimension(languageFormat);
+		} else if(modelType.equals("turtle")) {
+			dimension = new TurtleDimension(languageFormat);
+		} else if(modelType.equals("deepbee")) {
+			dimension = new DeepBeeDimension(languageFormat);
+		} else if(modelType.equals("teddy")) {
+			dimension = new TeddyDimension(10);
 		} else {
-
 			throw new RuntimeException("wot");
 		}
 	}
@@ -51,7 +65,7 @@ public class ModelFormat {
 	public int getNumParams() {
 		return dimension.getDimension();
 	}
-	
+
 	public Dimension getDimension() {
 		return dimension;
 	}
@@ -68,21 +82,27 @@ public class ModelFormat {
 		return dimension.getStateDecoderDimension(key);
 	}
 
-	public int getStateVectorSize() {
-		return dimension.getStateVectorSize();
+	public int getLeafDimension() {
+		return dimension.getLeafDimension();
 	}
+
+
 
 	public int getProgramEncoderDimension() {
 		return getInternalDimension() + getLeafDimension();
 	}
 
-	public int getLeafDimension() {
-		return dimension.getLeafDimension();
-	}
-
 	public int getInternalDimension() {
 		return dimension.getInternalDimension();
 	}
+
+	public int getInternalEncoderDimension(String type) {
+		return dimension.getInternalEncoderDimension(type);
+	}
+
+
+
+
 
 	// outputs
 	public int getNumOutputs() {
@@ -100,10 +120,6 @@ public class ModelFormat {
 
 	public List<String> getLeafTypes() {
 		return languageFormat.getLeafTypes();
-	}
-
-	public int getInternalEncoderDimension(String type) {
-		return dimension.getInternalEncoderDimension(type);
 	}
 
 	public String getEncoderType(String nodeType) {
@@ -126,12 +142,24 @@ public class ModelFormat {
 		return modelType.equals("chimp");
 	}
 
+	public boolean isTurtle() {
+		return modelType.equals("turtle");
+	}
+
 	public boolean isBee() {
 		return modelType.equals("bee");
 	}
-	
+
 	public boolean isPenguin() {
 		return modelType.equals("penguin");
+	}
+
+	public boolean isLemur() {
+		return modelType.equals("lemur");
+	}
+
+	public boolean isDeepBee() {
+		return modelType.equals("deepbee");
 	}
 
 	public String getModelType() {

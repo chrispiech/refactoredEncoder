@@ -5,7 +5,7 @@ import java.util.List;
 
 import models.code.State;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncoderParams;
 import models.encoder.neurons.ValueNeuron;
 import models.language.Language;

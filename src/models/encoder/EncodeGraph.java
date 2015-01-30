@@ -49,7 +49,7 @@ public class EncodeGraph {
 		return callGraph.hasCycles();
 	}
 	
-	public CodeVector getRunActivation() {
+	public ClusterableMatrix getRunActivation() {
 		throw new RuntimeException("todo");
 	}
 	
@@ -119,6 +119,11 @@ public class EncodeGraph {
 		Warnings.check(root != null);
 		TreeNeuron effectiveTree = flatTree(root, new IdCounter());
 		return effectiveTree;
+	}
+
+	public String getRunNodeId() {
+		if(!methods.containsKey("run")) return null;
+		return methods.get("run").getNodeId();
 	}
 	
 	

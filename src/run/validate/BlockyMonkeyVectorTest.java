@@ -5,7 +5,7 @@ import minions.encoder.modelVector.ModelVector;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.MonkeyModel;
+import models.encoder.encoders.models.MonkeyModel;
 import util.Warnings;
 
 public class BlockyMonkeyVectorTest {

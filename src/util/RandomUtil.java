@@ -20,4 +20,9 @@ public class RandomUtil {
 		return val;
 	}
 
+	public static int nextInt(int i, int j) {
+		if(i == j) return i;
+		return i + rg.nextInt(j - i);
+	}
+
 }

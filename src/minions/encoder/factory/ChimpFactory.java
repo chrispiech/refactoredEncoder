@@ -4,12 +4,12 @@ import util.Warnings;
 import minions.encoder.EncoderSaver;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BeeModel;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.MonkeyModel;
-import models.encoder.encoders.ProgramEncoder;
-import models.encoder.encoders.StateDecoder;
-import models.encoder.encoders.StateEncoder;
+import models.encoder.encoders.models.BeeModel;
+import models.encoder.encoders.models.MonkeyModel;
+import models.encoder.encoders.programEncoder.ProgramEncoderVec;
+import models.encoder.encoders.state.StateDecoder;
+import models.encoder.encoders.state.StateEncoder;
 
 public class ChimpFactory {
 	
@@ -22,7 +22,7 @@ public class ChimpFactory {
 		int stateSize2 = EncoderParams.getStateVectorSize();
 		Warnings.check(stateSize1 == stateSize2);
 		
-		ProgramEncoder program = randomMonkey.getProgramEncoder();
+		ProgramEncoderVec program = randomMonkey.getProgramEncoder();
 		StateDecoder output = bee.getStateDecoder();
 		StateEncoder input = bee.getStateEncoder();
 		

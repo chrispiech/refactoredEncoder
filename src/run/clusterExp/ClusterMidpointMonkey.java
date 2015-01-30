@@ -44,9 +44,9 @@ public class ClusterMidpointMonkey {
 		EncoderParams.setCodeVectorSize(n);
 		EncoderParams.setStateVectorSize(EncoderParams.getSqrtN());
 		
-		double weightDecay = 1.0E-4;//getParamLogScale(0.00001, 1);
-		double learningRate = 0.01;//getParamLogScale(0.001, 0.01);
-		int miniBatchSize = 1000;//(int) getParamLogScale(1000, 10000);
+		double weightDecay = getParamLogScale(0.00001, 0.01);
+		double learningRate = getParamLogScale(0.001, 0.05);
+		int miniBatchSize = (int) getParamLogScale(1000, 20000);
 		
 		EncoderParams.setWeightDecay(weightDecay);
 		EncoderParams.setLearningRate(learningRate);

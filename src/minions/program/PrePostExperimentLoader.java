@@ -2,28 +2,29 @@ package minions.program;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import org.ejml.simple.SimpleMatrix;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import minions.parser.EncodeGraphParser;
-import minions.parser.EncodeTreeParser;
-import models.ast.Tree;
+import models.code.GeneralState;
+import models.code.KarelState;
 import models.code.State;
 import models.code.TestTriplet;
 import models.encoder.EncodeGraph;
+import models.encoder.EncoderParams;
 import models.encoder.neurons.TreeNeuron;
 import models.language.Language;
+
+import org.ejml.simple.SimpleMatrix;
+import org.json.JSONObject;
+
 import util.FileSystem;
 import util.MatrixUtil;
-import util.RandomUtil;
 import util.Warnings;
 
 public class PrePostExperimentLoader {
@@ -50,11 +51,29 @@ public class PrePostExperimentLoader {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		trainPrograms = EncodeGraphsLoader.loadGraphs(lang, zip);
+		trainPrograms = EncodeGraphsLoader.loadRunTreeClones(lang, zip);
 	}
 
 	public static List<TestTriplet> loadTrainSet(int num, Language lang) {
 		throw new RuntimeException("must implement...");
+	}
+
+	public static List<TestTriplet> loadTrainSet(Language lang) {
+		return loadTrainSet(lang, -1);
+	}
+	
+	public static List<TestTriplet> loadTrainSet(Language lang, int i) {
+		File expDir = FileSystem.getExpDir();
+		File trainDir = new File(expDir, "train");
+		ZipFile zip = null;
+		try {
+			zip = new ZipFile(new File(trainDir, "encode.zip"));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		Map<String, EncodeGraph> map =  EncodeGraphsLoader.loadGraphs(lang, zip);
+
+		return getPrePostTriplets(map, trainDir, i, lang);
 	}
 
 	public static List<TestTriplet> loadTestSet(int num, Language lang) {
@@ -67,7 +86,7 @@ public class PrePostExperimentLoader {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		Map<String, TreeNeuron> m = EncodeGraphsLoader.loadGraphs(lang, zip);
+		Map<String, TreeNeuron> m = EncodeGraphsLoader.loadRunTreeClones(lang, zip);
 
 		File csv = new File(testDir, "prePost.csv");
 		return loadSubset(csv, m, num, lang);
@@ -112,7 +131,7 @@ public class PrePostExperimentLoader {
 		RandomAccessFile raf = getRandomAccessFile(csv);
 		List<TestTriplet> tests = new ArrayList<TestTriplet>();
 		while(true) {
-			String line = getRandomLine(raf);
+			/*String line = getRandomLine(raf);
 			if(line == null) continue;
 
 			TestTriplet test = lineToTest(m, line, l);
@@ -120,7 +139,8 @@ public class PrePostExperimentLoader {
 				tests.add(test);
 				//if(tests.size() % 100 == 0) System.out.println(tests.size());
 				if(tests.size() == num) return tests;
-			}
+			}*/
+			throw new RuntimeException("depricated");
 		}
 	}
 
@@ -132,29 +152,7 @@ public class PrePostExperimentLoader {
 		}
 	}
 
-	private static String getRandomLine(RandomAccessFile raf) {
-		try {
-			long length = raf.length();
-			raf.seek(RandomUtil.nextLong(length));
-			//get start
-			while(true) {
-				char ch = (char)raf.read();
-				if(ch == '\n') { break; }
-				if(raf.getFilePointer() >= length) return null;
-			}
-			// read until newline
-			String line = "";
-			while(true) {
-				char ch = (char)raf.read();
-				line += ch;
-				if(ch == '\n') { break; }
-				if(raf.getFilePointer() >= length) return null;
-			}
-			return line;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+
 
 	private static List<TestTriplet> loadTestsRandom(File testDir, int numAsts, Language language) {
 		/*Map<String, EncodeGraph> graphMap = loadPrograms(testDir, -1, language);
@@ -173,68 +171,97 @@ public class PrePostExperimentLoader {
 	}
 
 	private static List<TestTriplet> loadTests(File testDir, int max, Language language) {
-		/*System.out.println(testDir);
+		System.out.println(testDir);
 		Map<String, TreeNeuron> graphMap = loadPrograms(testDir, max, language);
 
-		return getPrePostTriplets(graphMap, testDir, max, language);*/
-		throw new RuntimeException("need to rethink");
+		return getPrePostTripletsDepricated(graphMap, testDir, max, language);
 	}
 
 	private static List<TestTriplet> getPrePostTriplets(
+			Map<String, EncodeGraph> map, File dir, int max, Language lang) {
+		List<TestTriplet> tests = new ArrayList<TestTriplet>();
+		int done = 0;
+		try {
+			File tripsFile = new File(dir, "prePost.csv");
+			Scanner sc = new Scanner(tripsFile); 
+			while(sc.hasNextLine()) {
+				String line = sc.nextLine();
+				TestTriplet test = lineToTest(map, line, lang);
+				if(test != null) {
+					tests.add(test);
+				}
+				if(++done % 1000 == 0) System.out.println(done);
+				if(max > 0 && done > max) break;
+			}
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+		return tests;
+	}
+
+	private static List<TestTriplet> getPrePostTripletsDepricated(
 			Map<String, TreeNeuron> graphMap, File testDir, int max,
 			Language language) {
-		System.out.println("loading prePost...");
+		/*System.out.println("loading prePost...");
 		File f = new File(testDir, "prePost.csv");
-		List<String> lines = FileSystem.getFileLines(f, max+1);
+		List<String> lines = null;
+		if(max < 0) {
+			lines = FileSystem.getFileLines(f);
+		} else {
+			lines = FileSystem.getFileLines(f, max+1);
+		}
+
 		Set<TestTriplet> tests = new HashSet<TestTriplet>();
 		//astId,nodeId,preRow,preCol,preDir,preStat,postRow,postCol,postDir,postStat
 		int count = 0;
 		for(int i = 1; i < lines.size(); i++) {
 			String line = lines.get(i);
 			TestTriplet test = lineToTest(graphMap, line, language);
+			if(test == null) continue;
+
 			tests.add(test);
 			count++;
 			if(count % 100 == 0) System.out.println(count);
 		}
-		System.out.println(tests.size());
-		Warnings.error("work in progress");
-		return null;//tests;
+		return new ArrayList<TestTriplet>(tests);*/
+		throw new RuntimeException("depricated");
 	}
 
 	private static TestTriplet lineToTest(ZipFile trainZip, String line,
 			Language lang) {
-		String[] cols = line.split(",");
+		/*String[] cols = line.split(",");
 		String astId = cols[0];
 		String nodeId = cols[1];
 		TreeNeuron effectiveTree = getEffectiveTree(trainZip, astId, nodeId, lang);
 		if(effectiveTree == null) {
 			return null;
 		}
-		return lineToTest(lang, cols, effectiveTree);
+		return lineToTest(lang, cols, effectiveTree);*/
+		throw new RuntimeException("depricated");
 	}
 
-	private static TestTriplet lineToTest(Map<String, TreeNeuron> graphMap,
+	private static TestTriplet lineToTest(Map<String, EncodeGraph> graphMap,
 			String line, Language lang) {
 		String[] cols = line.split(",");
-		String astId = cols[0];
-		String nodeId = cols[1];
-		TreeNeuron effectiveTree = getEffectiveTree(graphMap, astId, nodeId);
-		if(effectiveTree == null) {
-			//String params = "astId = " + astId;// + ", nodeId = " + nodeId;
-			//Warnings.msg("can't make effective tree for " + params);
+		String astId = cols[1];
+		if(!graphMap.containsKey(astId)) {
 			return null;
 		}
-		return lineToTest(lang, cols, effectiveTree);
+		EncodeGraph graph = graphMap.get(astId);
+		if(graph == null) return null;
+		String nodeId = cols[2];
+		return lineToTest(lang, cols, graph, nodeId);
 	}
 
-	private static TestTriplet lineToTest(Language lang, String[] cols,
-			TreeNeuron effectiveTree) {
+	public static TestTriplet lineToTest(Language lang, String[] cols,
+			EncodeGraph graph, String nodeId) {
 
-		String astId = cols[0];
-		int stateSize = (cols.length - 2) / 2;
+		int count = Integer.parseInt(cols[0]);
+		String astId = cols[1];
+		int stateSize = (cols.length - 3) / 2;
 
-		int start1 = 2;
-		int start2 = 2 + stateSize;
+		int start1 = 3;
+		int start2 = 3 + stateSize;
 		List<String> preList = new ArrayList<String>();
 		for(int j = start1; j < start2; j++) {
 			preList.add(cols[j]);
@@ -247,13 +274,11 @@ public class PrePostExperimentLoader {
 		State pre =  loadState(lang, preList);
 		State post = loadState(lang, postList);
 
-		Map<String, TreeNeuron> methodMap = new HashMap<String, TreeNeuron>();
-		methodMap.put("run", effectiveTree);
-		EncodeGraph graph = new EncodeGraph(methodMap);
-		return new TestTriplet(pre, post, graph, astId, 1);
+		
+		return new TestTriplet(pre, post, graph, astId, nodeId, count);
 	}
 
-	private static State loadState(Language language, List<String> preList) {
+	public static State loadState(Language language, List<String> preList) {
 		if(language.isBlocky()) {
 			return loadBlockyState(preList);
 		}
@@ -341,10 +366,10 @@ public class PrePostExperimentLoader {
 		choiceMap.put("status", list.get(3));
 		Map<String, Integer> numMap = new HashMap<String, Integer>();
 		Map<String, SimpleMatrix> matMap = new HashMap<String, SimpleMatrix>();
-		return new State(choiceMap, numMap, matMap);
+		return new GeneralState(choiceMap, numMap, matMap);
 	}
 
-	private static State loadKarelState(List<String> list) {
+	public static KarelState loadKarelState(List<String> list) {
 		int worldRows = Integer.parseInt(list.get(4)); 
 		int worldCols = Integer.parseInt(list.get(5));
 		int worldSize = worldRows * worldCols;
@@ -352,37 +377,43 @@ public class PrePostExperimentLoader {
 		Warnings.check(list.size() == expectedSize);
 
 		Map<String, Integer> numMap = new HashMap<String, Integer>();
-		numMap.put("row", Integer.parseInt(list.get(0)));
-		numMap.put("col", Integer.parseInt(list.get(1)));
+
+
 		numMap.put("worldRows", worldRows);
 		numMap.put("worldCols", worldCols);
 
 		Map<String, String> choiceMap = new HashMap<String, String>();
 		choiceMap.put("status", list.get(2));
 		choiceMap.put("direction", list.get(3));
+		choiceMap.put("col", list.get(1));
+		choiceMap.put("row", list.get(0));
+		
+		int row = Integer.parseInt(list.get(0));
+		int col = Integer.parseInt(list.get(1));
+		int status = Integer.parseInt(list.get(2));
+		int dir = Integer.parseInt(list.get(3));
 
-		Map<String, SimpleMatrix> matMap = new HashMap<String, SimpleMatrix>();
 		List<String> beeperList = list.subList(6, list.size());
 		Warnings.check(beeperList.size() == worldSize);
 		double[] beeperVector = new double[worldCols * worldRows];
 		for(int i = 0; i < beeperList.size(); i++) {
 			beeperVector[i] = Double.parseDouble(beeperList.get(i));
 		}
-		Warnings.check(worldRows <= 7);
-		Warnings.check(worldCols <= 7);
-		SimpleMatrix beeperMap = new SimpleMatrix(7, 7);
+
+		SimpleMatrix beepers = new SimpleMatrix(EncoderParams.worldRows, EncoderParams.worldCols);
 		SimpleMatrix beeperMapSmall = MatrixUtil.asSimpleMatrix(beeperVector);
 		beeperMapSmall.reshape(worldRows, worldCols);
 		for(int r = 0; r < beeperMapSmall.numRows(); r++) {
 			for(int c = 0; c < beeperMapSmall.numCols(); c++) {
-				beeperMap.set(r, c, beeperMapSmall.get(r, c));
+				beepers.set(r, c, beeperMapSmall.get(r, c));
 			}
 		}
 		// this is optional. We could keep the matrix in vector form...
-		
-		matMap.put("beepers", beeperMap);
-		return new State(choiceMap, numMap, matMap);
+
+		return new KarelState(row, col,dir, status, worldRows, worldCols, beepers);
 	}
+
+	
 
 
 

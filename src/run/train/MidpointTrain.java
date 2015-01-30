@@ -16,8 +16,8 @@ import minions.program.PostExperimentLoader;
 import models.code.TestTriplet;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
+import models.encoder.encoders.models.BearModel;
 
 public class MidpointTrain {
 	
@@ -34,7 +34,6 @@ public class MidpointTrain {
 		EncoderParams.setCodeVectorSize(40);
 		FileSystem.setAssnId("Midpoint");
 		FileSystem.setExpId("postExp");
-		EncoderParams.setWorldDim(6, 6);
 		trainSet = PostExperimentLoader.loadFolds("6x6", 9, format.getLanguage());
 		trainSet = PostExperimentLoader.removeRecursive(trainSet, format.getLanguage());
 		

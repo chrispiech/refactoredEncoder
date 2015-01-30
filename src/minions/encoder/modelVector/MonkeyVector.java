@@ -6,11 +6,11 @@ import java.util.List;
 import util.Warnings;
 import models.encoder.ModelFormat;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.BearModel;
-import models.encoder.encoders.MonkeyModel;
-import models.encoder.encoders.ProgramEncoder;
-import models.encoder.encoders.StateDecoder;
-import models.encoder.encoders.StateEncoder;
+import models.encoder.encoders.models.BearModel;
+import models.encoder.encoders.models.MonkeyModel;
+import models.encoder.encoders.programEncoder.ProgramEncoderVec;
+import models.encoder.encoders.state.StateDecoder;
+import models.encoder.encoders.state.StateEncoder;
 
 public class MonkeyVector {
 
@@ -33,7 +33,7 @@ public class MonkeyVector {
 		StateEncoder input = StateEncoderVector.vecToEncoder(format, inList);
 
 		// extract internal
-		ProgramEncoder program = ProgramVector.vecToProgram(format, programList);
+		ProgramEncoderVec program = ProgramVector.vecToProgram(format, programList);
 
 		return new MonkeyModel(format, program, output, input);
 	}

@@ -5,7 +5,7 @@ import java.util.List;
 
 import models.code.State;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncoderParams;
 import models.encoder.neurons.ValueNeuron;
 import models.language.Language;
@@ -69,6 +69,6 @@ public class MatrixDecoder extends ValueDecoder {
 		for(int i = 0; i < diff.getNumElements(); i++) {
 			loss += Math.pow(diff.get(i), 2);
 		}
-		return loss;
+		return loss * (1.0 / 36.0);
 	}
 }

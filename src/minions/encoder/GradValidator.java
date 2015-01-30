@@ -10,8 +10,8 @@ import models.encoder.encoders.Encoder;
 
 public class GradValidator {
 
-	private static final double EPSILON = 1E-6;
-	private static final double OK_DIFF = 1E-4;
+	public static final double EPSILON = 1E-6;
+	public static final double OK_DIFF = 1E-4;
 
 	public static boolean validate(Encoder model, List<TestTriplet> list) {
 		/*boolean valid = true;

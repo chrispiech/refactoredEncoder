@@ -18,10 +18,10 @@ import minions.encoder.factory.EncoderFactory;
 import minions.encoder.modelVector.ModelVector;
 import models.code.TestTriplet;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.StateEncoder;
-import models.encoder.encoders.types.StateEncodable;
+import models.encoder.encoders.models.BearModel;
+import models.encoder.encoders.models.StateEncodable;
+import models.encoder.encoders.state.StateEncoder;
 
 /**
  * @author Mike Phulsuksombati

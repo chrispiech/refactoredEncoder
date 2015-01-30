@@ -3,6 +3,7 @@ package models.math;
 import org.ejml.simple.SimpleMatrix;
 
 import util.MatrixUtil;
+import util.RandomUtil;
 import edu.stanford.nlp.classify.LogisticObjectiveFunction;
 import edu.stanford.nlp.optimization.DiffFunction;
 import edu.stanford.nlp.optimization.QNMinimizer;
@@ -17,10 +18,11 @@ import edu.stanford.nlp.optimization.QNMinimizer;
  */
 public class LogRegression {
 
-	private static final boolean ADD_INTERCEPT = false;
+	private static final boolean ADD_INTERCEPT = true;
 	private static final double LEARNING_RATE = 0.1;
-	private static final double THRESHOLD = 1E-15;
-	private static final int MAX_ITERATIONS = 100000;
+	private static final double THRESHOLD = 1E-20;
+	private static final int MAX_ITERATIONS = 10000;
+	private static final double LAMBDA = 0.0;
 	private SimpleMatrix theta;
 	private String name = "";
 
@@ -29,9 +31,8 @@ public class LogRegression {
 	public LogRegression(String name) {
 		this.name = name;
 	}
-
+	
 	public void train(SimpleMatrix f, SimpleMatrix labels) {
-		
 		SimpleMatrix fPrime = addInterceptFeature(f);
 		theta = MatrixUtil.randomVector(fPrime.numCols(), 1).transpose();
 
@@ -43,8 +44,47 @@ public class LogRegression {
 			double gradSize = 0;
 			for(int col = 0; col < fPrime.numCols(); col++) {
 				double activation = logistic(x);
+				double loss = -(label - activation);
+				double grad = loss * x.get(col);
+				if(col != fPrime.numCols() - 1) {
+					grad += LAMBDA * theta.get(col);
+				}
+				double update = theta.get(col) - LEARNING_RATE * grad;
+				gradSize += Math.pow(grad, 2);
+				thetaTemp.set(col, update);
+			}
+			theta = thetaTemp;
+			gradSize = Math.sqrt(gradSize);
+			if(gradSize < THRESHOLD) {
+				System.out.println("finished in " + i + " iterataion");
+				break;
+			}
+			if(i == MAX_ITERATIONS - 1) {
+				System.out.println("finished in " + i + " iterataion");
+			}
+			//if(i % 1000 == 0) System.out.println(i + ": " + gradSize);
+		}
+	}
+
+	public void oldTrain(SimpleMatrix f, SimpleMatrix labels) {
+		
+		SimpleMatrix fPrime = addInterceptFeature(f);
+		theta = MatrixUtil.randomVector(fPrime.numCols(), 1).transpose();
+
+		double inverseM = 1.0 / f.numRows();
+		for(int i = 0; i < MAX_ITERATIONS; i++) {
+			int row = (i % fPrime.numRows());
+			SimpleMatrix x = fPrime.extractMatrix(row, row+1, 0, fPrime.numCols());
+			double label = labels.get(row); 
+			SimpleMatrix thetaTemp = new SimpleMatrix(theta);
+			double gradSize = 0;
+			for(int col = 0; col < fPrime.numCols(); col++) {
+				double activation = logistic(x);
 				double loss = label - activation;
 				double grad = loss * x.get(col);
+				if(col != fPrime.numCols() - 1) {
+					grad += LAMBDA * theta.get(col);
+				}
 				double update = theta.get(col) + LEARNING_RATE * grad;
 				gradSize += Math.pow(grad, 2);
 				thetaTemp.set(col, update);
@@ -178,8 +218,9 @@ public class LogRegression {
 		SimpleMatrix l = new SimpleMatrix(n, 1);
 		for(int i = 0; i < n; i++) {
 			double v = Math.random() - 0.5;
-			m.set(i, 0, v);
-			l.set(i, v > 0 ? 1 : 0);
+			m.set(i, 0, v + RandomUtil.gauss(0, 0.00001));
+			m.set(i, 1, RandomUtil.gauss(0, 1));
+			l.set(i, v > 0.4 ? 1 : 0);
 		}
 		LogRegression r = new LogRegression();
 		r.train(m, l);

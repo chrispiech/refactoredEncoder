@@ -13,11 +13,11 @@ import minions.program.PostExperimentLoader;
 import models.ast.Tree;
 import models.code.State;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncodeGraph;
 import models.encoder.EncoderParams;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.types.StateEncodable;
+import models.encoder.encoders.models.StateEncodable;
 import models.encoder.neurons.TreeNeuron;
 import models.language.Language;
 
@@ -82,7 +82,7 @@ public class PostRandom {
 		List<TestTriplet> tests = PostExperimentLoader.load(NUM_PROGRAMS, lang);
 		Map<String, TestTriplet> programMap = new TreeMap<String, TestTriplet>();
 		for(TestTriplet t : tests) {
-			programMap.put(t.getId(), t);
+			programMap.put(t.getAstId(), t);
 		}
 		return programMap;
 	}

@@ -12,14 +12,14 @@ import minions.encoder.ModelTester;
 import minions.encoder.factory.EncoderFactory;
 import minions.program.PostExperimentLoader;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
-import models.encoder.encoders.StateDecoder;
 import models.encoder.encoders.Encoder;
 import models.encoder.encoders.InternalEncoder;
-import models.encoder.encoders.ProgramEncoder;
+import models.encoder.encoders.models.BearModel;
+import models.encoder.encoders.programEncoder.ProgramEncoderVec;
+import models.encoder.encoders.state.StateDecoder;
 import models.encoder.decoders.*;
 import models.language.KarelLanguage;
 

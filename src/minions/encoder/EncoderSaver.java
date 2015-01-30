@@ -42,7 +42,7 @@ public class EncoderSaver {
 
 		// save any notes
 		FileSystem.createFile(modelEpochDir, "notes.txt", notes);
-		System.out.println("model saved: " + modelDir.getPath());
+		//System.out.println("model saved: " + modelDir.getPath());
 		return modelEpochDir;
 	}
 
@@ -75,11 +75,8 @@ public class EncoderSaver {
 		ModelFormat format = model.getFormat();
 		return save(modelVec, format, fileNamePrefix, notes);
 	}
-
-	public static Encoder load(String name) {
-		File expDir = FileSystem.getExpDir();
-		File modelsDir = new File(expDir, "savedModels");
-		File modelDir = new File(modelsDir, name);
+	
+	public static Encoder load(File modelDir) {
 		Warnings.check(modelDir.exists(), "no model dir: " + modelDir.getAbsolutePath());
 
 		ModelFormat format = loadFormat(modelDir);
@@ -91,6 +88,13 @@ public class EncoderSaver {
 		}
 
 		return ModelVector.vecToModel(format, modelVec);
+	}
+
+	public static Encoder load(String name) {
+		File expDir = FileSystem.getExpDir();
+		File modelsDir = new File(expDir, "savedModels");
+		File modelDir = new File(modelsDir, name);
+		return load(modelDir);
 	}
 
 	private static void saveModel(double[] modelVec, File modelDir) {
@@ -112,7 +116,7 @@ public class EncoderSaver {
 		FileSystem.createFile(modelDir, "format.txt", formatStr);
 	}
 
-	private static ModelFormat loadFormat(File modelDir) {
+	public static ModelFormat loadFormat(File modelDir) {
 		File modelFormatFile = new File(modelDir, "format.txt");
 		List<String> lines = FileSystem.getFileLines(modelFormatFile);
 		Map<String, String> formatMap = getFormatMap(lines);
@@ -139,7 +143,7 @@ public class EncoderSaver {
 		return formatMap;
 	}
 
-	private static SimpleMatrix loadSimpleMatrix(File dir, String fileName) {
+	public static SimpleMatrix loadSimpleMatrix(File dir, String fileName) {
 		File matrixFile = new File(dir, fileName);
 		try {
 			return SimpleMatrix.loadBinary(matrixFile.getPath());
@@ -168,15 +172,18 @@ public class EncoderSaver {
 
 	}
 	
-	public static String makeNotes(List<TestTriplet> trainSet) {
+	public static String makeNotes() {
 		String notes = "";
 		notes += "learning rate: " + EncoderParams.getLearningRate() + "\n";
 		notes += "weight decay: " + EncoderParams.getWeightDecay() + "\n";
 		notes += "codeVec size: " + EncoderParams.getCodeVectorSize() + "\n";
 		notes += "stateVec size: " + EncoderParams.getStateVectorSize() + "\n";
 		notes += "miniBatch size: " + EncoderParams.getMiniBatchSize() + "\n";
+		notes += "numThreads: " + EncoderParams.getNumThreads() + "\n";
 		return notes;
 
 	}
+
+	
 
 }

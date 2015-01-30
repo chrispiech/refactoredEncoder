@@ -60,7 +60,7 @@ public class PostExperimentLoader {
 
 	private static void addToList(List<TestTriplet> all, List<TestTriplet> testSet,int maxId) {
 		for(TestTriplet t : testSet) {
-			int id = Integer.parseInt(t.getId());
+			int id = Integer.parseInt(t.getAstId());
 			if(maxId < 0 || id < maxId) {
 				all.add(t);
 			}

@@ -11,12 +11,14 @@ public class PenguinDimension extends Dimension {
 	}
 	
 	public int getDimension() { 
-		int inDim = getStateEncoderDimension();
+		throw new RuntimeException("should update");
+		/*int inDim = getStateEncoderDimension();
 		int outDim = getStateDecoderDimension();
-		int internalDim = getInternalDimension();
+		int internalDim = getInternalDimensionVec();
 		int leafDim = getLeafDimension();
 		int compositionDim = getCompositionDim();
 		return inDim + outDim + internalDim + leafDim + compositionDim;
+		*/
 	} 
 
 	public int getCompositionDim() {

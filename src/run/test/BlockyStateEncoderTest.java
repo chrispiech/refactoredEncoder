@@ -8,9 +8,9 @@ import minions.program.PostExperimentLoader;
 import minions.program.PrePostExperimentLoader;
 import models.code.TestTriplet;
 import models.encoder.EncoderParams;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.types.StateEncodable;
+import models.encoder.encoders.models.BearModel;
+import models.encoder.encoders.models.StateEncodable;
 import models.language.BlockyLanguage;
 
 import org.ejml.simple.SimpleMatrix;

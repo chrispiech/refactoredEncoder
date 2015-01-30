@@ -1,22 +1,26 @@
 package minions.encoder.modelVector;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import models.encoder.ClusterableMatrix;
+import models.encoder.EncoderParams;
+import models.encoder.ModelFormat;
+import models.encoder.encoders.Encoder;
+import models.encoder.encoders.InternalEncoder;
+import models.encoder.encoders.programEncoder.ProgramEncoder;
+import models.encoder.encoders.programEncoder.ProgramEncoderMatrix;
+import models.encoder.encoders.programEncoder.ProgramEncoderVec;
 
 import org.ejml.simple.SimpleMatrix;
 
 import util.MatrixUtil;
 import util.Warnings;
-import models.encoder.CodeVector;
-import models.encoder.EncoderParams;
-import models.encoder.ModelFormat;
-import models.encoder.encoders.ConstantEncoder;
-import models.encoder.encoders.Encoder;
-import models.encoder.encoders.InternalEncoder;
-import models.encoder.encoders.ProgramEncoder;
 
 public class ProgramVector {
 
-	public static ProgramEncoder vecToProgram(ModelFormat format,
+	public static ProgramEncoderVec vecToProgram(ModelFormat format,
 			List<Double> list) {
 		int split1 = format.getInternalDimension();
 		int split2 = split1 + format.getLeafDimension();
@@ -47,17 +51,61 @@ public class ProgramVector {
 		}
 
 		// extract leaves
-		HashMap<String, CodeVector> leaves = new HashMap<String, CodeVector>();
+		HashMap<String, SimpleMatrix> leaves = new HashMap<String, SimpleMatrix>();
 		for(String type : format.getLeafTypes()) {
 			List<Double> leafList = leavesList.subList(0, N);
 			leavesList = ModelVector.listPop(leavesList, N);
 			SimpleMatrix v = MatrixUtil.listToMatrix(leafList, N, 1);
-			leaves.put(type, new CodeVector(v));
+			leaves.put(type, new SimpleMatrix(v));
 		}
 		
 
 
-		return new ProgramEncoder(format, internalEncoders, leaves);
+		return new ProgramEncoderVec(format, internalEncoders, leaves);
+	}
+	
+	public static ProgramEncoderMatrix vecToProgramMatrix(ModelFormat format,
+			List<Double> list) {
+		int split1 = format.getInternalDimension();
+		int split2 = split1 + format.getLeafDimension();
+		Warnings.check(split2 == list.size());
+		List<Double> internalList = list.subList(0, split1);
+		List<Double> leavesList = list.subList(split1, split2);
+
+		int M = EncoderParams.getStateVectorSize();
+		int N = EncoderParams.getCodeVectorSize();
+		HashMap<String, InternalEncoder> internalEncoders = 
+				new HashMap<String, InternalEncoder>();
+		for(String type : format.getInternalEncoderTypes()) {
+			int dim = format.getInternalEncoderDimension(type);
+			List<Double> encoderList = internalList.subList(0, dim);
+			internalList = ModelVector.listPop(internalList, dim);
+			int arity = format.getArity(type);
+			List<SimpleMatrix> Ws = new ArrayList<SimpleMatrix>();
+			for(int i = 0; i < arity; i++) {
+				List<Double> wList = encoderList.subList(0, N);
+				encoderList = ModelVector.listPop(encoderList, N);
+				SimpleMatrix W = MatrixUtil.listToMatrix(wList, M, M);
+				Ws.add(W);
+			}
+			SimpleMatrix b = MatrixUtil.listToMatrix(encoderList, M, M);
+
+			InternalEncoder encoder = new InternalEncoder(type, Ws, b);
+			internalEncoders.put(type, encoder);
+		}
+
+		// extract leaves
+		HashMap<String, SimpleMatrix> leaves = new HashMap<String, SimpleMatrix>();
+		for(String type : format.getLeafTypes()) {
+			List<Double> leafList = leavesList.subList(0, N);
+			leavesList = ModelVector.listPop(leavesList, N);
+			SimpleMatrix v = MatrixUtil.listToMatrix(leafList, M, M);
+			leaves.put(type, new SimpleMatrix(v));
+		}
+		
+
+
+		return new ProgramEncoderMatrix(format, internalEncoders, leaves);
 	}
 	
 	public static String getNameForIndex(ModelFormat f, int i) {
@@ -93,7 +141,7 @@ public class ProgramVector {
 		
 		// add leaf
 		for(String type : model.getFormat().getLeafTypes()) {
-			SimpleMatrix v = programEncoder.getLeafVector(type).getVector();
+			SimpleMatrix v = programEncoder.getLeafEmbedding(type);
 			vecList.addAll(MatrixUtil.matrixToList(v));
 		}  
 		
@@ -101,5 +149,6 @@ public class ProgramVector {
 		
 		return vecList;
 	}
+
 
 }

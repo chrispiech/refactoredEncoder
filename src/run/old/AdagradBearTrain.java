@@ -18,8 +18,8 @@ import models.ast.Tree;
 import models.code.TestTriplet;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
+import models.encoder.encoders.models.BearModel;
 import models.encoder.neurons.TreeNeuron;
 
 import org.ejml.simple.SimpleMatrix;

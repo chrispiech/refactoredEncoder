@@ -12,6 +12,11 @@ public class EncoderParams{
 	private static int miniBatchSize = 1000;
 	private static double initStd = 0.01;
 	private static int stateVectorSize = 0;
+	public static int worldRows = 7;
+	public static int worldCols = 7;
+	public static boolean stateHasSize = true;
+	private static boolean multiThreaded = true;
+	private static int numThreads = 1;
 	
 	public static int getMiniBatchSize() {
 		return miniBatchSize;
@@ -64,6 +69,20 @@ public class EncoderParams{
 	}
 	public static boolean hasStateVectorSize() {
 		return stateVectorSize != 0;
+	}
+	public static void setMultiThreaded(boolean b) {
+		multiThreaded  = b;
+	}
+	
+	public static boolean getMultiThreaded() {
+		return multiThreaded;
+	}
+	public static void setNumThreads(int n) {
+		numThreads  = n;
+	}
+	
+	public static int getNumThreads() {
+		return numThreads;
 	}
 	
 }

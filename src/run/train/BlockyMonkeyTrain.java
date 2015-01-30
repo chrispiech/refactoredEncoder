@@ -12,14 +12,14 @@ import minions.encoder.backprop.BearBackprop;
 import minions.encoder.factory.EncoderFactory;
 import minions.encoder.modelVector.ModelVector;
 import minions.minimizer.AdaGrad;
-import minions.minimizer.AdaGrad2;
+import minions.minimizer.lemur.AdaGradThreadedLemur;
 import minions.program.PostExperimentLoader;
 import minions.program.PrePostExperimentLoader;
 import models.code.TestTriplet;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
+import models.encoder.encoders.models.BearModel;
 
 public class BlockyMonkeyTrain {
 	
@@ -50,7 +50,7 @@ public class BlockyMonkeyTrain {
 		double eta = EncoderParams.getLearningRate();
 		int miniBatchSize = 1000;
 		double[] loss = new double[epochs];
-		Encoder model = AdaGrad2.train(format, trainSet, epochs, NAME);
+		Encoder model = AdaGradThreadedLemur.train(format, trainSet, epochs, NAME);
 		//Encoder model = AdaGrad.minimize(format, trainSet, epochs, miniBatchSize, eta, loss, NAME);
 		EncoderSaver.save(model, NAME, EncoderSaver.makeNotes(trainSet, epochs));
 	}

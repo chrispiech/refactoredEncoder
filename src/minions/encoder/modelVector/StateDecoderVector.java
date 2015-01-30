@@ -9,8 +9,8 @@ import minions.encoder.factory.EncoderFactory;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
 import models.encoder.decoders.ValueDecoder;
-import models.encoder.encoders.BearModel;
-import models.encoder.encoders.StateDecoder;
+import models.encoder.encoders.models.BearModel;
+import models.encoder.encoders.state.StateDecoder;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -28,8 +28,8 @@ public class StateDecoderVector {
 			List<Double> encoderList = decoderList.subList(0, dim);
 			decoderList = ModelVector.listPop(decoderList, dim);
 			int m = format.getTypeVectorSize(key);
-			int stateEncodeSize = format.getStateVectorSize();
-			int wSize = m * format.getStateVectorSize();
+			int stateEncodeSize = EncoderParams.getM();
+			int wSize = m * EncoderParams.getM();
 			List<Double> wList = encoderList.subList(0, wSize);
 			SimpleMatrix W = MatrixUtil.listToMatrix(wList, m, stateEncodeSize);
 			List<Double> bList = encoderList.subList(wSize, encoderList.size());

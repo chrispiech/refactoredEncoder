@@ -37,14 +37,16 @@ public class TestTriplet {
 	private State postcondition;
 	private EncodeGraph encodeGraph;
 	private int count;
-	private String astId;
+	private int astId;
+	private int nodeId;
 
-	public TestTriplet(State pre, State post, EncodeGraph graph, String astId, int count) {
+	public TestTriplet(State pre, State post, EncodeGraph graph, String astId, String nodeId, int count) {
 		precondition = pre;
 		postcondition = post;
 		encodeGraph = graph;
-		this.astId = astId;
+		this.astId = Integer.parseInt(astId);
 		this.count = count;
+		this.nodeId = Integer.parseInt(nodeId);
 	}
 	
 	public void saveToFile(String expName, String dirName) {
@@ -83,8 +85,8 @@ public class TestTriplet {
 		return count;
 	}
 
-	public String getId() {
-		return astId;
+	public String getAstId() {
+		return astId + "";
 	}
 	
 	public boolean equals(Object o) {
@@ -106,6 +108,10 @@ public class TestTriplet {
 
 	public EncodeGraph getEncodeGraph() {
 		return encodeGraph;
+	}
+
+	public String getNodeId() {
+		return nodeId + "";
 	}
 
 }

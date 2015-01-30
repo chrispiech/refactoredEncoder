@@ -5,9 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.json.JSONObject;
 
@@ -75,6 +81,18 @@ public class FileSystem {
 			}
 		}
 		return content;
+	}
+	
+	public static String getZipEntryString(ZipFile zip, ZipEntry entry){
+		InputStream stream = null;
+		try {
+			stream = zip.getInputStream(entry);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		Scanner sc = new Scanner(stream).useDelimiter("\\A");
+		String str = sc.next();
+		return str;
 	}
 	
 	public static List<String> getFileLines(File f, int max) {
@@ -147,10 +165,14 @@ public class FileSystem {
 	}
 
 	public static Map<String, String> getFileMapString(File file) {
+		return getFileMapString(file, ",");
+	}
+	
+	public static Map<String, String> getFileMapString(File file, String delim) {
 		Map<String, String> map = new HashMap<String, String>();
 		List<String> lines = FileSystem.getFileLines(file);
 		for(String line : lines) {
-			String[] row = line.split(",");
+			String[] row = line.split(delim);
 			if(row.length != 2) {
 				System.out.println(line);
 				throw new RuntimeException("There should only be two cols");
@@ -303,6 +325,48 @@ public class FileSystem {
 
 	public static void setDataDir(String path) {
 		FileSystem.dataDirPath = path;
+	}
+
+	public static int getNumLines(File file) {
+		LineNumberReader lnr;
+		try {
+			lnr = new LineNumberReader(new FileReader(file));
+			lnr.skip(Long.MAX_VALUE);
+			int amount = lnr.getLineNumber() + 1;
+			lnr.close();
+			return amount;
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+	}
+	
+	public static String getRandomLine(RandomAccessFile raf) {
+		try {
+			long length = raf.length();
+			raf.seek(RandomUtil.nextLong(length));
+			//get start
+			while(true) {
+				char ch = (char)raf.read();
+				if(ch == '\n') { break; }
+				if(raf.getFilePointer() >= length) {
+					raf.seek(RandomUtil.nextLong(length));
+				};
+			}
+			// read until newline
+			String line = "";
+			while(true) {
+				char ch = (char)raf.read();
+				line += ch;
+				if(ch == '\n') { break; }
+				if(raf.getFilePointer() >= length) return null;
+			}
+			return line;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/*

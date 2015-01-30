@@ -16,8 +16,8 @@ import minions.program.PostExperimentLoader;
 import models.code.TestTriplet;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
+import models.encoder.encoders.models.BearModel;
 
 public class NewspaperBearTrain {
 	
@@ -34,7 +34,6 @@ public class NewspaperBearTrain {
 		EncoderParams.setCodeVectorSize(40);
 		FileSystem.setAssnId("Newspaper");
 		FileSystem.setExpId("postExp");
-		EncoderParams.setWorldDim(5, 7);
 		trainSet = PostExperimentLoader.loadFolds("homeWorld", 9, format.getLanguage());
 		trainSet = PostExperimentLoader.removeRecursive(trainSet, format.getLanguage());
 		

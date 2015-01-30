@@ -2,13 +2,13 @@ package minions.forceMult;
 
 import java.util.*;
 
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 
 public class FMMostCommon {
 	
 	private LinkedList<String> gradeList = new LinkedList<String>();
 
-	public FMMostCommon(TreeMap<String, CodeVector> encodingMap) {
+	public FMMostCommon(TreeMap<String, ClusterableMatrix> encodingMap) {
 		ArrayList<Integer> intIdList = new ArrayList<Integer>();
 		for(String id : encodingMap.keySet()) {
 			intIdList.add(Integer.parseInt(id));

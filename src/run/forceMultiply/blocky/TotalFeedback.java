@@ -13,7 +13,7 @@ import minions.parser.EncodeGraphParser;
 import minions.program.PostExperimentLoader;
 import models.ast.Tree;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncodeGraph;
 import models.encoder.EncoderParams;
 import models.encoder.encoders.Encoder;
@@ -59,7 +59,7 @@ public class TotalFeedback {
 		Map<String, TestTriplet> programMap = new TreeMap<String, TestTriplet>();
 		for(TestTriplet t : tests) {
 			if(!t.getEncodeGraph().hasCycles()) {
-				programMap.put(t.getId(), t);
+				programMap.put(t.getAstId(), t);
 			}
 		}
 		return programMap;

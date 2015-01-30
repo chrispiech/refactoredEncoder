@@ -2,11 +2,12 @@ package models.language;
 
 import java.util.*;
 
+import models.encoder.EncoderParams;
 import util.Warnings;
 
 public class KarelLanguage implements Language{
 
-	private static final String[] KAREL_LEAVES = {
+	protected static final String[] KAREL_LEAVES = {
 		"move",
 		"turnLeft",
 		"turnRight",
@@ -36,7 +37,7 @@ public class KarelLanguage implements Language{
 		"noop",
 	};
 	
-	private static final String[] KAREL_INTERNAL = {
+	protected static final String[] KAREL_INTERNAL = {
 		"block",
 		"!",
 		"&&",
@@ -46,13 +47,13 @@ public class KarelLanguage implements Language{
 		"repeat"
 	};
 	
-	private static final String[] KAREL_BLOCK_TYPES = {
+	protected static final String[] KAREL_BLOCK_TYPES = {
 		"while",
 		"repeat",
 		"ifElse"
 	};
 	
-	private Map<String, Integer> arityMap = new HashMap<String, Integer>();
+	protected Map<String, Integer> arityMap = new HashMap<String, Integer>();
 	{
 		arityMap.put("block", 2);
 		arityMap.put("!", 1);
@@ -64,33 +65,39 @@ public class KarelLanguage implements Language{
 		arityMap.put("method", 1);
 	}
 	
-	private List<String> stateKeys = new ArrayList<String>();
+	protected List<String> stateKeys = new ArrayList<String>();
 	{
 		stateKeys.add("row");
 		stateKeys.add("col");
 		stateKeys.add("status");
-		stateKeys.add("worldRows");
-		stateKeys.add("worldCols");
+		if(EncoderParams.stateHasSize) {
+			stateKeys.add("worldRows");
+			stateKeys.add("worldCols");
+		}
 		stateKeys.add("direction");
 		stateKeys.add("beepers");
 	}
 	
-	private Map<String, String[]> outputOptions = 
+	protected Map<String, String[]> outputOptions = 
 			new HashMap<String, String[]>();
 	{
 		String[] dirOptions = {"0", "1", "2", "3"};
 		outputOptions.put("direction", dirOptions);
 		String[] stateOptions = {"0", "1", "2", "3", "4"};
 		outputOptions.put("status", stateOptions);
+		String[] colOptions = {"0", "1", "2", "3", "4", "5"};
+		outputOptions.put("col", colOptions);
 	}
 	
-	private Map<String, String> outputType = 
+	protected Map<String, String> outputType = 
 			new HashMap<String, String>();
 	{
 		outputType.put("row", "number");
-		outputType.put("col", "number");
-		outputType.put("worldRows", "number");
-		outputType.put("worldCols", "number");
+		outputType.put("col", "choice");
+		if(EncoderParams.stateHasSize) {
+			outputType.put("worldRows", "number");
+			outputType.put("worldCols", "number");
+		}
 		outputType.put("status", "choice");
 		outputType.put("direction", "choice");
 		outputType.put("beepers", "matrix");

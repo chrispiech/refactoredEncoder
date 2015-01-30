@@ -1,6 +1,6 @@
 package models.encoder.neurons;
 
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 
 import org.ejml.simple.SimpleMatrix;
 

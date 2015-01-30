@@ -10,6 +10,9 @@ import minions.encoder.factory.EncoderFactory;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
 import models.encoder.encoders.*;
+import models.encoder.encoders.models.BearModel;
+import models.encoder.encoders.programEncoder.ProgramEncoderVec;
+import models.encoder.encoders.state.StateDecoder;
 import models.encoder.decoders.*;
 
 public class BearVector {
@@ -26,7 +29,7 @@ public class BearVector {
 		StateDecoder output = StateDecoderVector.vecToDecoder(format, outList);
 
 		// extract internal
-		ProgramEncoder program = ProgramVector.vecToProgram(format, programList);
+		ProgramEncoderVec program = ProgramVector.vecToProgram(format, programList);
 
 		return new BearModel(format, program, output);
 	}

@@ -28,7 +28,6 @@ public class NewspaperMonkeyCheck {
 		EncoderParams.setCodeVectorSize(9);
 		EncoderParams.setWeightDecay(0.1);
 		EncoderParams.setInitStd(5);
-		EncoderParams.setWorldDim(5, 7);
 		FileSystem.setAssnId("Newspaper");
 		FileSystem.setExpId("prePostExp");
 

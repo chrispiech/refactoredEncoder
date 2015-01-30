@@ -1,16 +1,27 @@
 package minions.encoder.modelVector;
 
-import java.util.*;
+import java.util.List;
 
 import minions.encoder.factory.EncoderFactory;
+import minions.minimizer.teddy.TeddyVec;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.BearModel;
-import models.encoder.encoders.BeeModel;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.MonkeyModel;
-import models.encoder.encoders.PenguinModel;
+import models.encoder.encoders.models.BearModel;
+import models.encoder.encoders.models.BeeModel;
+import models.encoder.encoders.models.DeepBeeModel;
+import models.encoder.encoders.models.LemurModel;
+import models.encoder.encoders.models.MonkeyModel;
+import models.encoder.encoders.models.PenguinModel;
+import models.encoder.encoders.models.TurtleModel;
+
+import org.apache.commons.math3.util.Pair;
+import org.ejml.simple.SimpleMatrix;
+
+import com.google.common.primitives.Doubles;
+
 import util.Warnings;
+import edu.stanford.nlp.util.ArrayUtils;
 
 
 public class ModelVector {
@@ -18,7 +29,12 @@ public class ModelVector {
 	/************************************************************************
 	 *                        MODEL TO VEC
 	 ***********************************************************************/
-
+	
+	public static double[] modelToVec(TurtleModel model, SimpleMatrix matrix) {
+		List<Double> vecList = TurtleVector.turtleToVec(model, matrix);
+		return listToVec(vecList);
+	}
+	
 	public static double[] modelToVec(Encoder model) {
 		List<Double> vecList = null;
 		ModelFormat format = model.getFormat();
@@ -30,6 +46,12 @@ public class ModelVector {
 			vecList = BeeVector.beeToVec((BeeModel) model);
 		} else if(format.isPenguin()) {
 			vecList = PenguinVector.penguinToVec((PenguinModel) model);
+		} else if(format.isLemur()) {
+			vecList = LemurVector.lemurToVec((LemurModel) model);
+		} else if(format.isTurtle()) {
+			vecList = TurtleVector.turtleToVec((TurtleModel) model);
+		} else if(format.isDeepBee()) {
+			vecList = DeepBeeVector.deepbeeToVec((DeepBeeModel)model);
 		}
 
 		validateVec(model, vecList);
@@ -59,7 +81,18 @@ public class ModelVector {
 		if(format.isPenguin()) {
 			return PenguinVector.getNameForIndex(format, elem);
 		}
-		throw new RuntimeException("todo");
+		if(format.isTurtle()) {
+			return TurtleVector.getNameForIndex(format, elem);
+		}
+		if(format.isLemur()) {
+			return LemurVector.getNameForIndex(format, elem);
+		}
+		throw new RuntimeException("test");
+	}
+	
+	public static Pair<TurtleModel, SimpleMatrix> vecToModelMatrix(double[] x) {
+		List<Double> list = vecToList(x);
+		return TurtleVector.vecToTurtleMatrix(list);
 	}
 
 	public static Encoder vecToModel(ModelFormat format, double[] params) {
@@ -72,9 +105,15 @@ public class ModelVector {
 			return BeeVector.vecToBee(format, list);
 		} else if(format.isPenguin()) { 
 			return PenguinVector.vecToPenguin(format, list);
-		} else {
-			throw new RuntimeException("no");
-		}
+		} else if(format.isLemur()) {
+			return LemurVector.vecToLemur(format, list);
+		} else if(format.isTurtle()) {
+			return TurtleVector.vecToTurtle(format, list);
+		} else if(format.isDeepBee()) {
+			return DeepBeeVector.vecToDeepBee(format, list);
+		} 
+		throw new RuntimeException("no");
+
 	}
 
 	public static List<Double> listPop(List<Double> encoderList, int size) {
@@ -82,20 +121,11 @@ public class ModelVector {
 	}
 
 	private static List<Double> vecToList(double[] params) {
-		List<Double> list = new LinkedList<Double>();
-		for(int i = 0; i < params.length; i++) {
-			list.add(params[i]);
-		}
-		return list;
+		return Doubles.asList(params);
 	}
 
 	private static double[] listToVec(List<Double> vecList) {
-		double[] vec = new double[vecList.size()];
-		for(int i = 0; i < vecList.size(); i++) {
-			vec[i] = vecList.get(i);
-		}
-
-		return vec;
+		return ArrayUtils.asPrimitiveDoubleArray(vecList);
 	}
 
 	public static void main(String[] args) {

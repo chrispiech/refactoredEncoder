@@ -10,14 +10,14 @@ import models.encoder.ModelFormat;
 import models.encoder.decoders.ValueDecoder;
 import models.encoder.decoders.SoftmaxDecoder;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.StateDecoder;
+import models.encoder.encoders.state.StateDecoder;
 import models.encoder.neurons.ValueNeuron;
 import models.encoder.neurons.TreeNeuron;
 
 public class StateDecoderBackprop {
 
 	public static void outputError(
-			ModelFormat format, ValueNeuron outNode, State truth, String key) {
+			ModelFormat format, ValueNeuron outNode, State truth, String key, int weight) {
 		String outType = format.getOutputType(key);
 		if(outType.equals("choice")) {
 			softmaxError(format, outNode, truth, key);
@@ -28,6 +28,7 @@ public class StateDecoderBackprop {
 		} else {
 			Warnings.error("no beans");
 		}
+		outNode.setError(outNode.getError().scale(weight));
 	}
 	
 	public static void gradientStepValue(
@@ -67,10 +68,11 @@ public class StateDecoderBackprop {
 		SimpleMatrix z = outNode.getZ();
 		SimpleMatrix t = truth.getMatrixVector(key);
 		SimpleMatrix mu = getRSquared(t, z);
+		mu = mu.scale(1.0/36.0);
 		outNode.setError(mu);
 	}
 	
-	private static void updateGradOut(
+	public static void updateGradOut(
 			ValueDecoder outEncoder, SimpleMatrix dW, SimpleMatrix dB) {
 		SimpleMatrix newW = outEncoder.getW().plus(dW);
 		SimpleMatrix newB = outEncoder.getB().plus(dB);

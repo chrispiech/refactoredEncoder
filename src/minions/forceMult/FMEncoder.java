@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncoderParams;
 import models.math.LogRegression;
 
@@ -22,6 +22,9 @@ public class FMEncoder implements FMMinion, CodeVectorLogistic{
 	private Map<String, List<Boolean>> gradedMap = null;
 
 	private int numFeedbacks = 0;
+	
+	public FMEncoder() {
+	}
 
 	public FMEncoder(TreeMap<String, SimpleMatrix> encodingMap2) {
 		this.encodingMap = encodingMap2;
@@ -125,4 +128,5 @@ public class FMEncoder implements FMMinion, CodeVectorLogistic{
 	public void test() {
 		throw new RuntimeException("test");
 	}
+
 }

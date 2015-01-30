@@ -12,7 +12,7 @@ import minions.parser.EncodeGraphParser;
 import minions.program.PostExperimentLoader;
 import models.ast.Tree;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncodeGraph;
 import models.encoder.EncoderParams;
 import models.encoder.encoders.Encoder;
@@ -56,7 +56,7 @@ public class ProgramKMeansMany {
 		Set<String> toGrade = encodingMap.keySet();
 		System.out.println("num programs: " + toGrade.size());
 
-		FileSystem.setExpId("feedbackExp");
+		/*FileSystem.setExpId("feedbackExp");
 		File resultDir = new File(FileSystem.getExpDir(), "results");
 		String resultFileName = "kmeans2-" + modelName;
 		File resultFile = new File(resultDir, resultFileName);
@@ -72,7 +72,7 @@ public class ProgramKMeansMany {
 			double result = force.run(BUDGET);
 			resultTxt += result + "\n";
 			FileSystem.createFile(resultDir, resultFileName, resultTxt);
-		}
+		}*/
 	}
 
 	private TreeMap<String, SimpleMatrix> makeEncodingMap(
@@ -81,7 +81,7 @@ public class ProgramKMeansMany {
 		for(String id : programMap.keySet()) {
 			TestTriplet test = programMap.get(id);
 			try{
-				CodeVector cv = model.getCodeVector(test);
+				ClusterableMatrix cv = model.getCodeEmbedding(test);
 				encodingMap.put(id, cv.getVector());
 			} catch(RuntimeException e) {
 				System.out.println("ERROR PARSING: " + id);
@@ -96,7 +96,7 @@ public class ProgramKMeansMany {
 		List<TestTriplet> tests = PostExperimentLoader.load(NUM_PROGRAMS, lang);
 		Map<String, TestTriplet> programMap = new TreeMap<String, TestTriplet>();
 		for(TestTriplet t : tests) {
-			programMap.put(t.getId(), t);
+			programMap.put(t.getAstId(), t);
 		}
 		return programMap;
 	}

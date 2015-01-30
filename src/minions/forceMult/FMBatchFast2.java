@@ -2,7 +2,7 @@ package minions.forceMult;
 
 import java.util.*;
 
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.math.LogRegression;
 
 import org.ejml.simple.SimpleMatrix;
@@ -27,11 +27,11 @@ public class FMBatchFast2 {
 	
 	private Map<String, SimpleMatrix> notChosenCache = new HashMap<String, SimpleMatrix>();
 
-	public FMBatchFast2(Map<String, CodeVector> codeVectorMap) {
+	public FMBatchFast2(Map<String, ClusterableMatrix> codeVectorMap) {
 		this(codeVectorMap, DEFAULT_BATCH_SIZE);
 	}
 	
-	public FMBatchFast2(Map<String, CodeVector> codeVectorMap, int batchSize) {
+	public FMBatchFast2(Map<String, ClusterableMatrix> codeVectorMap, int batchSize) {
 		this.batchSize = batchSize;
 		createNormalizedEncodingMap(codeVectorMap);
 		this.notChosen = new HashSet<String>();
@@ -41,7 +41,7 @@ public class FMBatchFast2 {
 		this.chosen = new ArrayList<String>();
 	}
 
-	private void createNormalizedEncodingMap(Map<String, CodeVector> codeVectorMap) {
+	private void createNormalizedEncodingMap(Map<String, ClusterableMatrix> codeVectorMap) {
 		encodingMap = new HashMap<String, SimpleMatrix>();
 		for(String key : codeVectorMap.keySet()) {
 			SimpleMatrix v = codeVectorMap.get(key).getVector();

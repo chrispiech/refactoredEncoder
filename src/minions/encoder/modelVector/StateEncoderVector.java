@@ -7,14 +7,14 @@ import org.ejml.simple.SimpleMatrix;
 import util.MatrixUtil;
 import models.encoder.EncoderParams;
 import models.encoder.ModelFormat;
-import models.encoder.encoders.StateEncoder;
+import models.encoder.encoders.state.StateEncoder;
 
 public class StateEncoderVector {
 
 	public static StateEncoder vecToEncoder(ModelFormat format,
 			List<Double> inList) {
 		Map<String, SimpleMatrix> wMap = new HashMap<String, SimpleMatrix>();
-		int stateSize = format.getStateVectorSize();
+		int stateSize = EncoderParams.getM();
 		for(String key : format.getLanguage().getStateKeys()) {
 			int rows = stateSize;
 			int cols = format.getTypeVectorSize(key);

@@ -11,6 +11,8 @@ import models.code.State;
 import models.code.TestTriplet;
 import models.encoder.*;
 import models.encoder.encoders.*;
+import models.encoder.encoders.models.BearModel;
+import models.encoder.encoders.programEncoder.ProgramEncoderVec;
 import models.encoder.neurons.ValueNeuron;
 import models.encoder.neurons.TreeNeuron;
 import models.encoder.decoders.*;
@@ -53,7 +55,7 @@ public class BearBackprop {
 		TreeNeuron runTree = graph.getRunEncodeTreeClone();
 
 		// calculate the activation of all tree nodes
-		ProgramEncoder programEncoder = model.getProgramEncoder();
+		ProgramEncoderVec programEncoder = model.getProgramEncoder();
 		SimpleMatrix cv = programEncoder.activateTree(runTree).getVector();
 		State truth = test.getPostcondition();
 
@@ -96,8 +98,8 @@ public class BearBackprop {
 		ValueDecoder parent = model.getOutputDecoder(outNode.getKey());
 		SimpleMatrix parentError = outNode.getError();
 		SimpleMatrix parentW = parent.getW();
-		ProgramEncoder programModel = model.getProgramEncoder();
-		ProgramEncoder programGrad = modelGrad.getProgramEncoder();
+		ProgramEncoderVec programModel = model.getProgramEncoder();
+		ProgramEncoderVec programGrad = modelGrad.getProgramEncoder();
 		ProgramBackprop.gradientStepTree(programModel, programGrad, tree,
 				parentError, parentW, 0);
 	}

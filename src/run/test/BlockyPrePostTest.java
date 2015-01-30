@@ -7,8 +7,8 @@ import minions.encoder.ModelTester;
 import minions.program.PostExperimentLoader;
 import models.code.TestTriplet;
 import models.encoder.EncoderParams;
-import models.encoder.encoders.BearModel;
 import models.encoder.encoders.Encoder;
+import models.encoder.encoders.models.BearModel;
 import models.language.BlockyLanguage;
 
 import org.ejml.simple.SimpleMatrix;

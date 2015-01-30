@@ -13,11 +13,11 @@ import minions.program.PostExperimentLoader;
 import models.ast.Tree;
 import models.code.State;
 import models.code.TestTriplet;
-import models.encoder.CodeVector;
+import models.encoder.ClusterableMatrix;
 import models.encoder.EncodeGraph;
 import models.encoder.EncoderParams;
 import models.encoder.encoders.Encoder;
-import models.encoder.encoders.types.StateEncodable;
+import models.encoder.encoders.models.StateEncodable;
 import models.encoder.neurons.TreeNeuron;
 import models.language.Language;
 
@@ -60,20 +60,16 @@ public class PostRandomMany {
 
 		FileSystem.setExpId("feedbackExp");
 		File resultDir = new File(FileSystem.getExpDir(), "results");
-		String resultFileName = "random-" + modelName;
-		File resultFile = new File(resultDir, resultFileName);
-		String resultTxt = "";
-		if(FileSystem.getFileContents(resultFile) != null) {
-			resultTxt = FileSystem.getFileContents(resultFile);
-			throw new RuntimeException("make sure to change seed start");
-		}
+		File resultModelDir = new File(resultDir, "random-" + modelName);
+		
 		System.out.println("running active learning!");
 		for(int i = 0; i < ITERATIONS; i++) {
 			FMMinion minion = new FMEncoderRandom(encodingMap, i);
 			ForceMultiplier force = new ForceMultiplier(minion, feedbackMap, toGrade);
-			double result = force.run(BUDGET);
-			resultTxt += result + "\n";
-			FileSystem.createFile(resultDir, resultFileName, resultTxt);
+			String result = force.run(BUDGET);
+			
+			String resultFileName = "random-" + modelName + "-" + i + ".txt";
+			FileSystem.createFile(resultModelDir, resultFileName, result);
 		}
 	}
 
@@ -98,7 +94,7 @@ public class PostRandomMany {
 		List<TestTriplet> tests = PostExperimentLoader.load(NUM_PROGRAMS, lang);
 		Map<String, TestTriplet> programMap = new TreeMap<String, TestTriplet>();
 		for(TestTriplet t : tests) {
-			programMap.put(t.getId(), t);
+			programMap.put(t.getAstId(), t);
 		}
 		return programMap;
 	}

@@ -3,17 +3,17 @@ package minions.encoder.backprop;
 import java.util.ArrayList;
 import java.util.List;
 
+import models.encoder.ClusterableMatrix;
+import models.encoder.EncoderParams;
+import models.encoder.encoders.InternalEncoder;
+import models.encoder.encoders.programEncoder.ProgramEncoder;
+import models.encoder.encoders.programEncoder.ProgramEncoder;
+import models.encoder.neurons.TreeNeuron;
+
 import org.ejml.simple.SimpleMatrix;
 
 import util.NeuralUtils;
 import util.StrUtil;
-import models.code.TestTriplet;
-import models.encoder.CodeVector;
-import models.encoder.EncoderParams;
-import models.encoder.encoders.Encoder;
-import models.encoder.encoders.InternalEncoder;
-import models.encoder.encoders.ProgramEncoder;
-import models.encoder.neurons.TreeNeuron;
 
 public class ProgramBackprop {
 
@@ -38,9 +38,6 @@ public class ProgramBackprop {
 		SimpleMatrix fPrime = NeuralUtils.elementTanhGrad(z);
 		SimpleMatrix Werror = parentW.transpose().mult(parentError);
 		SimpleMatrix error = Werror.elementMult(fPrime);
-		if(!error.isVector() || error.numRows() != EncoderParams.getN()) {
-			throw new RuntimeException("wrong size");
-		}
 		tree.setError(error);
 	}
 
@@ -58,15 +55,15 @@ public class ProgramBackprop {
 	 *********************/
 	
 	public static void gradientStepTree(
-			ProgramEncoder model,
-			ProgramEncoder grad,
+			ProgramEncoder programModel,
+			ProgramEncoder programGrad,
 			TreeNeuron tree, 
 			SimpleMatrix parentError,
 			SimpleMatrix parentW,
 			int depth) {
 		
-		gradientStepNode(model, grad, tree, parentError, parentW);
-		gradStepChildren(model, grad, tree, depth);
+		gradientStepNode(programModel, programGrad, tree, parentError, parentW);
+		gradStepChildren(programModel, programGrad, tree, depth);
 	}
 	
 	private static void gradientStepNode(
@@ -93,23 +90,23 @@ public class ProgramBackprop {
 	}
 
 	public static void gradStepChildren(
-			ProgramEncoder model,
-			ProgramEncoder grad,
+			ProgramEncoder programModel,
+			ProgramEncoder programGrad,
 			TreeNeuron tree,
 			int depth) {
 		for(int i = 0; i < tree.numChildren(); i++) {
 			TreeNeuron child = tree.getChild(i);
-			InternalEncoder encoder = model.getInternalEncoder(tree);
+			InternalEncoder encoder = programModel.getInternalEncoder(tree);
 			SimpleMatrix W = encoder.getW(i);
-			gradientStepTree(model, grad, child, tree.getError(), W, depth + 1);
+			gradientStepTree(programModel, programGrad, child, tree.getError(), W, depth + 1);
 		}
 	}
 
 	public static void gradStepInternal(
-			ProgramEncoder model, 
-			ProgramEncoder grad,
+			ProgramEncoder programModel, 
+			ProgramEncoder programGrad,
 			TreeNeuron node) {
-		InternalEncoder encoder = model.getInternalEncoder(node);
+		InternalEncoder encoder = programModel.getInternalEncoder(node);
 		SimpleMatrix nodeError = node.getError();
 
 		// calculate derivatives...
@@ -122,7 +119,7 @@ public class ProgramBackprop {
 		}
 		SimpleMatrix dB = new SimpleMatrix(nodeError);
 
-		InternalEncoder gradEncoder = grad.getInternalEncoder(node);
+		InternalEncoder gradEncoder = programGrad.getInternalEncoder(node);
 		updateGradInternal(gradEncoder, dWs, dB);
 	}
 
@@ -140,22 +137,21 @@ public class ProgramBackprop {
 			}
 		}
 		for(String leafType : model.getFormat().getLeafTypes()) {
-			CodeVector leafGrad = modelGrad.getLeafVector(leafType);
-			SimpleMatrix v = model.getLeafVector(leafType).getVector();
-			SimpleMatrix dV = leafGrad.getVector();
+			SimpleMatrix dV = modelGrad.getLeafEmbedding(leafType);
+			SimpleMatrix v = model.getLeafEmbedding(leafType);
 			dV = dV.plus(v.scale(EncoderParams.getWeightDecay())); 
-			leafGrad.set(dV);
+			modelGrad.setLeafEmbedding(leafType, dV);
 		}
 	}
 	
 	public static void updateGradLeaf(
-			ProgramEncoder grad, 
+			ProgramEncoder programGrad, 
 			SimpleMatrix dF, String type) {
 		if(StrUtil.isNumeric(type)) return;
-		CodeVector leaf = grad.getLeafVector(type);
-		SimpleMatrix newV = leaf.getVector().plus(dF);
+		SimpleMatrix leaf = programGrad.getLeafEmbedding(type);
+		SimpleMatrix newV = leaf.plus(dF);
 		leaf.set(newV);
-		grad.setLeafVector(type, leaf);
+		programGrad.setLeafEmbedding(type, leaf);
 	}
 	
 

@@ -44,7 +44,6 @@ public class ClusterNewspaperMonkey {
 	private void setParameters(int n) {
 		EncoderParams.setCodeVectorSize(n);
 		EncoderParams.setStateVectorSize(EncoderParams.getSqrtN());
-		EncoderParams.setWorldDim(5, 7);
 		
 		double weightDecay = getParamLogScale(0.00001, 1);
 		double learningRate = getParamLogScale(0.001, 0.01);
